@@ -1,10 +1,10 @@
-App = Ember.Application.create();
+Omoikane = Ember.Application.create();
 
-App.Router.map(function() {
+Omoikane.Router.map(function() {
   // put your routes here
 });
 
-App.IndexRoute = Ember.Route.extend({
+Omoikane.IndexRoute = Ember.Route.extend({
   model: function() {
     return ['red', 'yellow', 'blue'];
   }
