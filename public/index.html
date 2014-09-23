@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Omoikane</title>
   <link rel="stylesheet" href="/css/foundation.min.css" />
+  <link rel="stylesheet" href="/css/foundation-icons.css" />
+  <link rel="stylesheet" href="/css/omoikane.css" />
   <script src="js/vendor/modernizr.js"></script>
 </head>
 <body>
@@ -20,11 +22,23 @@
     </div>
   </script>
 
+  <script type="text/x-handlebars" id="queries">
+    <div class="small-12-columns">
+      <p>Cookie</p>
+    </div>
+  </script>
+
   <script type="text/x-handlebars" id="index">
     <div class="small-12 columns">
       <ul>
         {{#each item in model}}
-        <li>{{item}}</li>
+        <li>
+        {{item.title}}
+        {{item.state}}
+        {{format-time item.submittedAt}}
+        {{format-time item.startedAt}}
+        {{format-time item.finishedAt}}
+        </li>
         {{/each}}
       </ul>
     </div>
@@ -33,6 +47,7 @@
   <script src="/js/libs/jquery-1.10.2.js"></script>
   <script src="/js/libs/handlebars-1.1.2.js"></script>
   <script src="/js/libs/ember-1.7.0.js"></script>
+  <script src="/js/moment.min.js"></script>
   <script src="/js/app.js"></script>
   <script src="/js/foundation.min.js"></script>
 </body>
