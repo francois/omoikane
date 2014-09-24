@@ -29,18 +29,43 @@
   </script>
 
   <script type="text/x-handlebars" id="index">
-    <div class="small-12 columns">
-      <ul>
-        {{#each item in model}}
-        <li>
-        {{item.title}}
-        {{item.state}}
-        {{format-time item.submittedAt}}
-        {{format-time item.startedAt}}
-        {{format-time item.finishedAt}}
-        </li>
-        {{/each}}
-      </ul>
+    <div class="large-3 small-12 columns queries">
+      {{#each item in model}}
+      <div>
+        {{#if item.isRunning}}
+        <i class="fi-refresh"></i>
+        {{/if}}
+        {{#if item.isPending}}
+        <i class="fi-clock"></i>
+        {{/if}}
+        {{#if item.isFinished}}
+        <i class="fi-folder"></i>
+        {{/if}}
+        {{#if item.isErrored}}
+        <i class="fi-first-aid"></i>
+        {{/if}}
+
+        <p>{{#link-to "query" item}}{{item.title}}{{/link-to}}</p>
+
+        <p>
+          <small>
+            {{#if item.isRunning}}
+            {{format-time item.startedAt}}
+            {{/if}}
+            {{#if item.isPending}}
+            {{format-time item.submittedAt}}
+            {{/if}}
+            {{#if item.isFinished}}
+            {{format-time item.finishedAt}}
+            {{/if}}
+            {{#if item.isErrored}}
+            {{format-time item.finishedAt}}
+            {{/if}}
+            by {{item.author}}
+          </small>
+        </p>
+      </div>
+      {{/each}}
     </div>
   </script>
 
