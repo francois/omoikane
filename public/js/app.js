@@ -1,17 +1,39 @@
 Omoikane = Ember.Application.create();
 
 Omoikane.Router.map(function() {
-  this.resource("query", { path: "/query/:query_id" });
+  this.resource('about');
+  this.resource('queries', function() {
+    this.resource('query', { path: ':query_id' });
+  });
 });
 
-Omoikane.IndexRoute = Ember.Route.extend({
+Omoikane.QueriesRoute = Ember.Route.extend({
     model: function() {
       return queries;
     }
 });
 
-// Omoikane.IndexController = Ember.Controller.extend({
-// });
+
+Omoikane.QueryRoute = Ember.Route.extend({
+  model: function(params) {
+    return queries.findBy('id', params.query_id);
+  }
+});
+
+
+Omoikane.QueryController = Ember.ObjectController.extend({
+  isEditing: false,
+
+  actions: {
+    edit: function() {
+      this.set('isEditing', true);
+    },
+
+    doneEditing: function() {
+      this.set('isEditing', false);
+    }
+  }
+});
 
 Ember.Handlebars.helper('format-time', function(tstamp) {
   return moment(tstamp).fromNow();
@@ -51,7 +73,7 @@ var queries = [
     , rowCount: 2
   }
 , {
-      sql: "SELECT count(DISTINCT persona_service_id)\nFROM show_interaction_bindings\nWHERE market_id = '51ee6da0-4f76-012f-6b52-4040b2a1b35b'\n  AND interaction_created_at >= '2014-09-01' AND interaction_created_at < '2014-10-01'"
+      sql: "SELECT count(DISTINCT persona_service_id)\nFROM show_interaction_bindings\nWHERE market_id IN '51ee6da0-4f76-012f-6b52-4040b2a1b35b'\n  AND interaction_created_at >= '2014-09-01' AND interaction_created_at < '2014-10-01'"
     , title: "count uniques in france"
     , state: "errored"
     , author: "pablo"
@@ -59,6 +81,7 @@ var queries = [
     , startedAt: moment().add(-20, "minutes")
     , finishedAt: moment().add(-20, "minutes")
     , isErrored: true
+    , stderr: "NOTICE: Syntax error"
     , id: "f9096b10-24ed-0132-93a3-20c9d08537a9"
   }
 , {

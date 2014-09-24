@@ -11,10 +11,23 @@
 </head>
 <body>
   <script type="text/x-handlebars">
-    <div class="row">
-      <div class="small-12 columns">
-        <h1>Welcome to Omoikane</h1>
-      </div>
+    <div class="contain-to-grid">
+      <nav class="top-bar" data-topbar role="navigation">
+      <ul class="title-area">
+        <li class="name">
+        <h1>{{#link-to "index" class="brand"}}Omoikane{{/link-to}}</h1>
+        </li>
+        <!-- Remove the class "menu-icon" to get rid of menu icon. Take out "Menu" to just have icon alone -->
+        <li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a></li>
+      </ul>
+
+      <section class="top-bar-section">
+      <ul class="left">
+        <li>{{#link-to "queries"}}Queries{{/link-to}}</li>
+        <li>{{#link-to "about"}}About{{/link-to}}</li>
+      </ul>
+      </section>
+      </nav>
     </div>
 
     <div class="row">
@@ -22,52 +35,102 @@
     </div>
   </script>
 
-  <script type="text/x-handlebars" id="queries">
-    <div class="small-12-columns">
-      <p>Cookie</p>
-    </div>
-  </script>
-
   <script type="text/x-handlebars" id="index">
-    <div class="large-3 small-12 columns queries">
-      {{#each item in model}}
-      <div>
-        {{#if item.isRunning}}
-        <i class="fi-refresh"></i>
-        {{/if}}
-        {{#if item.isPending}}
-        <i class="fi-clock"></i>
-        {{/if}}
-        {{#if item.isFinished}}
-        <i class="fi-folder"></i>
-        {{/if}}
-        {{#if item.isErrored}}
-        <i class="fi-first-aid"></i>
-        {{/if}}
+    <p>Click {{#link-to "queries"}}queries{{/link-to}} above to navigate to queries.</p>
+  </script>
 
-        <p>{{#link-to "query" item}}{{item.title}}{{/link-to}}</p>
+  <script type="text/x-handlebars" id="queries">
+    <div class="large-3 columns">
+      <table class="table">
+        <thead>
+          <tr><th>Recent Queries</th></tr>
+        </thead>
 
-        <p>
-          <small>
-            {{#if item.isRunning}}
-            {{format-time item.startedAt}}
-            {{/if}}
-            {{#if item.isPending}}
-            {{format-time item.submittedAt}}
-            {{/if}}
-            {{#if item.isFinished}}
-            {{format-time item.finishedAt}}
-            {{/if}}
-            {{#if item.isErrored}}
-            {{format-time item.finishedAt}}
-            {{/if}}
-            by {{item.author}}
-          </small>
-        </p>
-      </div>
-      {{/each}}
+        <tbody class="queries">
+          {{#each model}}
+          <tr>
+            <td>
+              {{#if isRunning}}
+              <i class="fi-refresh"></i>
+              {{/if}}
+              {{#if isPending}}
+              <i class="fi-clock"></i>
+              {{/if}}
+              {{#if isFinished}}
+              <i class="fi-folder"></i>
+              {{/if}}
+              {{#if isErrored}}
+              <i class="fi-first-aid"></i>
+              {{/if}}
+
+              <p>{{#link-to "query" this}}{{title}}{{/link-to}}</p>
+
+              <p>
+              <small>
+                {{#if isRunning}}
+                {{format-time startedAt}}
+                {{/if}}
+                {{#if isPending}}
+                {{format-time submittedAt}}
+                {{/if}}
+                {{#if isFinished}}
+                {{format-time finishedAt}}
+                {{/if}}
+                {{#if isErrored}}
+                {{format-time finishedAt}}
+                {{/if}}
+                by {{author}}
+              </small>
+              </p>
+
+            </td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="large-9 columns">
+      {{outlet}}
     </div>
   </script>
+
+  <script type="text/x-handlebars" id="queries/index">
+    <p class="text-warning">Please select a query</p>
+  </script>
+
+  <script type="text/x-handlebars" id="query">
+    <h1>{{title}}</h1>
+    <!-- if isFinished, show results in paginated view -->
+    <!-- if isError, show stderr -->
+    <!-- if isEditing, only show UI for the SQL query -->
+    <dl>
+      <dt>SQL</dt>
+      <dd>
+      <pre><code>{{sql}}</code></pre>
+      </dd>
+      {{#if stderr}}
+      <dt>Error</dt>
+      <dd>
+      <pre><code>{{stderr}}</code></pre>
+      </dd>
+      {{/if}}
+    </dl>
+  </script>
+
+  <script type="text/x-handlebars" id="query/_edit">
+    <p>{{input type="text" value=title}}</p>
+    <p>{{input type="text" value=excerpt}}</p>
+    <p>{{textarea value=body}}</p>
+  </script>
+
+
+  <script type="text/x-handlebars" id="about">
+    <div class="row">
+      <p>Yippee!</p>
+    </div>
+  </script>
+
 
   <script src="/js/libs/jquery-1.10.2.js"></script>
   <script src="/js/libs/handlebars-1.1.2.js"></script>
