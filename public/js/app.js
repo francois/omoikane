@@ -105,3 +105,6 @@ var queries = [
     , id: "f9517570-24ed-0132-93a3-20c9d08537a9"
   }
 ];
+
+// TODO: Run this on every "page" load
+hljs.initHighlightingOnLoad();

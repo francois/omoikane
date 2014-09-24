@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="/css/foundation.min.css" />
   <link rel="stylesheet" href="/css/foundation-icons.css" />
   <link rel="stylesheet" href="/css/omoikane.css" />
+  <link rel="stylesheet" href="/css/solarized_light.css">
   <script src="js/vendor/modernizr.js"></script>
 </head>
 <body>
@@ -107,12 +108,12 @@
     <dl>
       <dt>SQL</dt>
       <dd>
-      <pre><code>{{sql}}</code></pre>
+      <pre><code class="language-sql">{{sql}}</code></pre>
       </dd>
       {{#if stderr}}
       <dt>Error</dt>
       <dd>
-      <pre><code>{{stderr}}</code></pre>
+      <pre><code class="nohighlight">{{stderr}}</code></pre>
       </dd>
       {{/if}}
     </dl>
@@ -136,7 +137,10 @@
   <script src="/js/libs/handlebars-1.1.2.js"></script>
   <script src="/js/libs/ember-1.7.0.js"></script>
   <script src="/js/moment.min.js"></script>
-  <script src="/js/app.js"></script>
   <script src="/js/foundation.min.js"></script>
+  <script src="/js/highlight.pack.js"></script>
+
+  <!-- required to be last, since we initialize highlight.js in it -->
+  <script src="/js/app.js"></script>
 </body>
 </html>
