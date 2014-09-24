@@ -51,35 +51,13 @@
           {{#each model}}
           <tr>
             <td>
-              {{#if isRunning}}
-              <i class="fi-refresh"></i>
-              {{/if}}
-              {{#if isPending}}
-              <i class="fi-clock"></i>
-              {{/if}}
-              {{#if isFinished}}
-              <i class="fi-folder"></i>
-              {{/if}}
-              {{#if isErrored}}
-              <i class="fi-first-aid"></i>
-              {{/if}}
+              <i {{bind-attr class="uiStateClass"}}></i>
 
               <p>{{#link-to "query" this}}{{title}}{{/link-to}}</p>
 
               <p>
               <small>
-                {{#if isRunning}}
-                {{format-time startedAt}}
-                {{/if}}
-                {{#if isPending}}
-                {{format-time submittedAt}}
-                {{/if}}
-                {{#if isFinished}}
-                {{format-time finishedAt}}
-                {{/if}}
-                {{#if isErrored}}
-                {{format-time finishedAt}}
-                {{/if}}
+                {{format-time stateLastChangedAt}}
                 by {{author}}
               </small>
               </p>
