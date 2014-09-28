@@ -5,4 +5,5 @@ mkdir -p $JOBDIR
 JOBID=$( uuidgen )
 
 mkdir -p $JOBDIR/$JOBID
-echo "SELECT * from monkey" > $JOBDIR/$JOBID/query.sql
+echo "$( date +"%Y-%m-%dT%H:%M:%S.%N%z" ),queued" > $JOBDIR/$JOBID/state-changes.csv
+echo "SELECT * from monkey WHERE random() < random()" > $JOBDIR/$JOBID/query.sql
