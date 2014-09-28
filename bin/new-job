@@ -1,0 +1,8 @@
+#!/bin/bash
+JOBDIR=${1?Missing JOBDIR}
+
+mkdir -p $JOBDIR
+JOBID=$( uuidgen )
+
+mkdir -p $JOBDIR/$JOBID
+echo "SELECT * from monkey" > $JOBDIR/$JOBID/query.sql

@@ -1,0 +1,25 @@
+#!/usr/bin/env ruby
+require "bundler"
+Bundler.require :default, :worker
+
+def usage(message)
+  STDERR.puts <<-EOF.gsub(/^ {4}/, "")
+    Usage: #{File.basename($0)} JOBSDIR
+
+    Where:
+
+      JOBSDIR:
+        The name of a directory where jobs are dropped. #{File.basename($0)} will
+        launch new queries as they are created.
+  EOF
+end
+
+JOBSDIR = ARGV.shift
+usage("JOBSDIR not passed on command line: won't continue") unless JOBSDIR
+usage("JOBSDIR is set to #{JOBSDIR.inspect}, but is not a directory: won't continue") unless File.directory?(JOBSDIR)
+
+jobrunner_path = File.expand_path("../omoikane-run-query", __FILE__)
+
+require "omoikane/worker"
+worker = Omoikane::Worker.new(JOBSDIR, jobrunner_path)
+worker.run # never returns

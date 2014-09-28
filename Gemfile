@@ -1,7 +1,9 @@
 source "https://rubygems.org"
-ruby "2.1.2"
+ruby "2.1.3"
 
-gem "oj"
-gem "sinatra"
-gem "thin"
-gem "uuid"
+group :server do
+  gem "oj"
+  gem "sinatra"
+  gem "thin"
+  gem "uuid"
+end
