@@ -1,0 +1,75 @@
+#!/bin/bash
+JOBDIR=${1?Missing JOBDIR as 1st argument}
+if [[ ! -d ${JOBDIR} ]] ; then exit 10 ; fi
+
+PSQL_PATH=/usr/bin/psql
+if [[ ! -x ${PSQL_PATH} ]] ; then exit 11 ; fi
+
+# An input file: the query we will be running
+QUERY_FILE_PATH=${JOBDIR}/query.sql
+if [[ ! -f ${QUERY_FILE_PATH} ]] ; then exit 12 ; fi
+
+exec 1>${JOBDIR}/job.log 2>&1
+
+STATE_FILE_PATH=${JOBDIR}/state-changes.csv
+
+EXPLAIN_QUERY_PATH=${JOBDIR}/explain-query.sql
+EXPLAIN_STDOUT_PATH=${JOBDIR}/explain-query-stdout.txt
+EXPLAIN_STDERR_PATH=${JOBDIR}/explain-query-stderr.txt
+/bin/rm --force ${EXPLAIN_STDOUT_PATH} ${EXPLAIN_STDERR_PATH}
+
+RUN_QUERY_PATH=${JOBDIR}/run-query.sql
+RUN_STDOUT_PATH=${JOBDIR}/results.csv
+RUN_STDERR_PATH=${JOBDIR}/run-query-stderr.txt
+ROWS_COUNT_PATH=${JOBDIR}/rows-count.csv
+/bin/rm --force ${RUN_STDOUT_PATH} ${RUN_STDERR_PATH} ${ROWS_COUNT_PATH}
+
+function record_state_change {
+  local new_state
+  new_state=${1?Missing new_state for "record_state_change" function}
+
+  # log state change
+  /bin/echo "record_state_change: ${new_state}"
+
+  # record state change
+  /bin/echo $( /bin/date +"%Y-%m-%dT%H:%M:%S.%N%z" ),${new_state} >> ${STATE_FILE_PATH}
+}
+
+function explain_query {
+  /bin/echo "EXPLAIN"          > ${EXPLAIN_QUERY_PATH}
+  /bin/cat ${QUERY_FILE_PATH} >> ${EXPLAIN_QUERY_PATH}
+
+  record_state_change "explaining"
+
+  ${PSQL_PATH} --no-psqlrc --file=${EXPLAIN_QUERY_PATH} > ${EXPLAIN_STDOUT_PATH} 2> >( /usr/bin/tee -a ${EXPLAIN_STDERR_PATH} )
+  if [[ $? -gt 0 ]]
+  then
+    record_state_change "errored-explain"
+    exit 1
+  fi
+}
+
+function run_query {
+  /bin/echo "COPY ("                                                     > ${RUN_QUERY_PATH}
+  /bin/cat ${QUERY_FILE_PATH}                                           >> ${RUN_QUERY_PATH}
+  /bin/echo ") TO stdout WITH (FORMAT csv, HEADER true, DELIMITER ',')" >> ${RUN_QUERY_PATH}
+
+  record_state_change "running"
+
+  ${PSQL_PATH} --no-psqlrc --file=${RUN_QUERY_PATH} 2> >( /usr/bin/tee -a ${RUN_STDERR_PATH} ) | /bin/gzip > ${RUN_STDOUT_PATH}.gz
+  if [[ $? -gt 0 ]]
+  then
+    record_state_change "errored-running"
+    exit 1
+  fi
+}
+
+function count_result_rows {
+  record_state_change "counting"
+  /bin/zcat ${RUN_STDOUT_PATH} | /usr/bin/wc --lines | /usr/bin/awk '{ print $1 }' > ${ROWS_COUNT_PATH}
+}
+
+explain_query
+run_query
+count_result_rows
+record_state_change "finished"
