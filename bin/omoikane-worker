@@ -14,7 +14,7 @@ def usage(message)
   EOF
 end
 
-JOBSDIR = ARGV.shift
+JOBSDIR = ENV["JOBSDIR"]
 usage("JOBSDIR not passed on command line: won't continue") unless JOBSDIR
 usage("JOBSDIR is set to #{JOBSDIR.inspect}, but is not a directory: won't continue") unless File.directory?(JOBSDIR)
 
