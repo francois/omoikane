@@ -24,6 +24,7 @@ package{[
   'rabbitmq-server',
   'erlang',
   'build-essential',
+  'htop',
 ]:
   ensure => latest,
 }
