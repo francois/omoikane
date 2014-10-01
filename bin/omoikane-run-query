@@ -11,6 +11,7 @@ if [[ ! -f ${QUERY_FILE_PATH} ]] ; then exit 12 ; fi
 
 exec 1>${JOBDIR}/job.log 2>&1
 
+JOBID=$( /usr/bin/basename ${JOBDIR} )
 STATE_FILE_PATH=${JOBDIR}/state-changes.csv
 
 EXPLAIN_QUERY_PATH=${JOBDIR}/explain-query.sql
@@ -36,8 +37,9 @@ function record_state_change {
 }
 
 function explain_query {
-  /bin/echo "EXPLAIN"          > ${EXPLAIN_QUERY_PATH}
-  /bin/cat ${QUERY_FILE_PATH} >> ${EXPLAIN_QUERY_PATH}
+  /bin/echo "EXPLAIN"           > ${EXPLAIN_QUERY_PATH}
+  /bin/echo "/* ${JOBDIR} */"  >> ${EXPLAIN_QUERY_PATH}
+  /bin/cat ${QUERY_FILE_PATH}  >> ${EXPLAIN_QUERY_PATH}
 
   record_state_change "explaining"
 
@@ -51,6 +53,7 @@ function explain_query {
 
 function run_query {
   /bin/echo "\set ON_ERROR_STOP on"                                      > ${RUN_QUERY_PATH}
+  /bin/echo "/* ${JOBID} */"                                            >> ${RUN_QUERY_PATH}
   /bin/echo "COPY ("                                                    >> ${RUN_QUERY_PATH}
   /bin/cat ${QUERY_FILE_PATH}                                           >> ${RUN_QUERY_PATH}
   /bin/echo ") TO stdout WITH (FORMAT csv, HEADER true, DELIMITER ',')" >> ${RUN_QUERY_PATH}
