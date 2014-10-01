@@ -45,5 +45,7 @@
 <a href="/queries/new" class="button secondary">New Query</a>
 </p>
 
-<h2>Plan</h2>
-<pre><%=h job.query_plan %></pre>
+<% if job.query_plan.respond_to?(:empty?) && !job.query_plan.empty? then %>
+  <h2>Plan</h2>
+  <pre><%=h job.query_plan %></pre>
+<% end %>
