@@ -6,7 +6,7 @@
 </h6>
 
 <% if job.has_results? && job.rows_count.nonzero? then %>
-  <a href="/query/<%=h job.id %>.csv" class="button tiny right"><i class="fi-video"></i> Download as CSV</a>
+  <a href="/query/<%=h job.id %>.csv" class="button tiny right"><i class="fi-page-export-csv"></i> Download as CSV</a>
   <h2>Results</h2>
   <table class="table">
     <thead>

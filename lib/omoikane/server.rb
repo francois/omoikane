@@ -78,9 +78,9 @@ module Omoikane
         case state
         when "finished"   ; "fi-folder"
         when "running"    ; "fi-refresh"
-        when "explaining" ; "fi-refresh"
+        when "explaining" ; "fi-loop"
         when "queued"     ; "fi-clock"
-        when /^errored-/  ; "fi-error"
+        when /^errored-/  ; "fi-asterisk"
         else              ; "fi-first-aid"
         end
       end
