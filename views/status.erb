@@ -1,4 +1,4 @@
-<h1><%=h job.title %></h1>
+<h1><%=h truncate(job.title) %></h1>
 <h6>
   <span title="<%=h job.current_state %>"><i class="<%= job_state_css_class(job.current_state) %>"></i></span>
   <span class="timestamp"><%=format_timestamp job.updated_at %></span>,
