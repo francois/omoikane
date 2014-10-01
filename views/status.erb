@@ -34,7 +34,7 @@
 
 <% if job.query_error.respond_to?(:empty?) && !job.query_error.empty? then %>
   <h2>Errors</h2>
-  <pre><code class="nohighlight"><%=h job.query_error %></code></pre>
+  <pre><%=h job.query_error %></pre>
 <% end %>
 
 <h2>Query</h2>
@@ -44,3 +44,6 @@
 <a href="/query/<%=h job.id %>/edit" class="button">Edit</a>
 <a href="/queries/new" class="button secondary">New Query</a>
 </p>
+
+<h2>Plan</h2>
+<pre><%=h job.query_plan %></pre>
