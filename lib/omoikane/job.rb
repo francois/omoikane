@@ -26,6 +26,27 @@ module Omoikane
       last_change ? Time.parse(last_change.first).utc : Time.now.utc
     end
 
+    def finished?
+      current_state == "finished"
+    end
+
+    def elapsed_seconds
+      changes = attributes.fetch(:state_changes, [])
+      started_at  = changes.first
+      finished_at = changes.last
+      if started_at && finished_at then
+        if started_at == finished_at then
+          # No state change, so we can use "now"
+          Time.now.utc - Time.parse(started_at.first).utc
+        else
+          Time.parse(finished_at.first).utc - Time.parse(started_at.first).utc
+        end
+      else
+        # This seems like an error, so 0 is a safe value
+        0
+      end
+    end
+
     def has_results?
       current_state == "finished"
     end

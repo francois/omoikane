@@ -2,7 +2,7 @@
 <h6>
   <span title="<%=h job.current_state %>"><i class="<%= job_state_css_class(job.current_state) %>"></i></span>
   <span class="timestamp"><%=format_timestamp job.updated_at %></span>,
-  by <span class="author"><%=h job.author %></span>
+  by <span class="author"><%=h job.author %></span><% if job.finished? then %>, in <span class="elapsed"><%=format_elapsed job.elapsed_seconds / 60.0 %> minutes</span><% end %>
 </h6>
 
 <% if job.has_results? && job.rows_count.nonzero? then %>

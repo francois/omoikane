@@ -118,6 +118,10 @@ module Omoikane
         end
       end
 
+      def format_elapsed(duration)
+        "%.1f" % [ duration ]
+      end
+
       def vm
         @vm ||= OpenStruct.new(jobs: controller.jobs.first(25))
       end
