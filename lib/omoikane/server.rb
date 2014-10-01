@@ -44,9 +44,13 @@ module Omoikane
     end
 
     get "/query/:id.csv" do
+      @job = controller.job_status(params[:id])
       results_path = controller.job_results_path(params[:id])
       headers "Content-Encoding" => "gzip"
-      send_file results_path, disposition: :attachment
+      send_file results_path,
+        disposition: :attachment,
+        filename: "#{@job.id}.csv",
+        type: :csv
     end
 
     get "/query/:id" do
