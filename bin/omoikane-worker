@@ -1,5 +1,4 @@
 #!/usr/bin/env ruby
-require "bundler"
 Bundler.require :default, :worker
 
 def usage(message)
