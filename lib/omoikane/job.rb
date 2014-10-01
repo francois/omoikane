@@ -8,12 +8,16 @@ module Omoikane
 
     attr_reader :attributes
 
+    def new_record?
+      !attributes.has_key?(:id)
+    end
+
     def id
       attributes.fetch(:id)
     end
 
     def current_state
-      attributes.fetch(:current_status)
+      attributes.fetch(:current_state)
     end
 
     def updated_at
@@ -22,8 +26,24 @@ module Omoikane
       last_change ? Time.parse(last_change.first).utc : Time.now.utc
     end
 
+    def has_results?
+      current_state == "finished"
+    end
+
     def author
       attributes.fetch(:author)
+    end
+
+    def title
+      attributes[:title] || attributes.fetch(:query).gsub("\n", " ")
+    end
+
+    def rows_count
+      attributes.fetch(:rows_count)
+    end
+
+    def query
+      attributes.fetch(:query)
     end
 
     def query_plan
@@ -36,6 +56,14 @@ module Omoikane
 
     def query_error
       attributes.fetch(:run_stderr)
+    end
+
+    def columns
+      attributes.fetch(:columns)
+    end
+
+    def results
+      attributes.fetch(:results)
     end
   end
 end

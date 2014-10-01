@@ -1,0 +1,46 @@
+<h1><%=h job.title %></h1>
+<h6>
+  <span title="<%=h job.current_state %>"><i class="<%= job_state_css_class(job.current_state) %>"></i></span>
+  <span class="timestamp"><%=format_timestamp job.updated_at  %></span>
+  by <span class="author"><%=h job.author %></span>
+</h6>
+
+<% if job.has_results? && job.rows_count.nonzero? then %>
+  <h2>Results</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        <% job.columns.each do |name| %>
+          <th><%=h name %></th>
+        <% end %>
+      </tr>
+    </thead>
+    <tbody>
+      <% job.results.each do |row| %>
+        <tr>
+          <% job.columns.each_with_index do |_, i| %>
+            <td><%=h row[i] %></td>
+          <% end %>
+        </tr>
+      <% end %>
+    </tbody>
+    <tfoot>
+      <tr>
+        <th scope="row" colspan="<%=h job.columns.size %>">Total Rows: <%=h job.rows_count %></th>
+      </tr>
+    </tfoot>
+  </table>
+<% end %>
+
+<% if job.query_error.respond_to?(:empty?) && !job.query_error.empty? then %>
+  <h2>Errors</h2>
+  <pre><code class="nohighlight"><%=h job.query_error %></code></pre>
+<% end %>
+
+<h2>Query</h2>
+<pre><code class="language-sql"><%=h job.query %></code></pre>
+<br>
+<p>
+<a href="/query/<%=h job.id %>/edit" class="button">Edit</a>
+<a href="/queries/new" class="button secondary">New Query</a>
+</p>

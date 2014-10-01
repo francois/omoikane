@@ -6,4 +6,7 @@ JOBID=$( uuidgen )
 
 mkdir -p $JOBDIR/$JOBID
 echo "$( date +"%Y-%m-%dT%H:%M:%S.%N%z" ),queued" > $JOBDIR/$JOBID/state-changes.csv
+echo '{"author":"Francois"}' > $JOBDIR/$JOBID/details.json
 echo "SELECT * from monkey WHERE random() < random()" > $JOBDIR/$JOBID/query.sql
+
+$EDITOR $JOBDIR/$JOBID/details.json

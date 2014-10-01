@@ -5,9 +5,11 @@ gem "foreman", group: :unused
 gem "oj"
 
 group :server do
+  gem "escape"
   gem "sinatra"
   gem "thin"
   gem "uuid"
+  gem "tzinfo"
 end
 
 group :worker do

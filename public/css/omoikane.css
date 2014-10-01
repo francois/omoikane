@@ -1,8 +1,16 @@
-.queries i {
+.jobs i {
   float: right;
   padding-top: 2px;
 }
 
-.queries p {
+.jobs p {
   margin-bottom: 0;
+}
+
+textarea {
+  font-family: Monaco, "Courier New";
+}
+
+.author {
+  text-transform: capitalize;
 }

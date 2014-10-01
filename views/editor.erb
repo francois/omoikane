@@ -1,0 +1,28 @@
+<form method="post" action="/queries">
+  <div class="row">
+    <div class="large-3 columns">
+      <label>Author:
+        <input type="text" placeholder="Author" required name="query[author]" value="<%=h job.author %>">
+      </label>
+    </div>
+    <div class="large-9 columns">
+      <label>Title:
+        <input type="text" placeholder="Query title (optional)" name="query[title]" value="<%=h job.title %>">
+      </label>
+    </div>
+  </div>
+  <div class="row">
+    <div class="large-12 columns">
+      <label>Query (SQL):
+        <textarea placeholder="SELECT * FROM ..." required name="query[sql]" rows="20"><%=h job.query %></textarea>
+      </label>
+    </div>
+  </div>
+  <div class="row">
+    <div class="large-12 columns">
+      <input type="submit" class="button primary" value="Submit">
+      or
+      <a href="/">Cancel</a>
+    </div>
+  </div>
+</form>

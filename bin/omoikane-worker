@@ -4,7 +4,7 @@ Bundler.require :default, :worker
 
 def usage(message)
   STDERR.puts <<-EOF.gsub(/^ {4}/, "")
-    Usage: #{File.basename($0)} JOBSDIR
+    Usage: #{File.basename($0)}
 
     Where:
 

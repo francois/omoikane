@@ -14,6 +14,17 @@ module Omoikane
     # Indicates where in the filesystem to find existing jobs
     attr_reader :jobsdir, :mapper
 
+    def submit_job(id, job)
+      jobdir = File.join(jobsdir, id)
+      Dir.mkdir(jobdir) unless File.directory?(jobdir)
+
+      mapper.write_job(jobdir, {
+        author: job.author,
+        title: job.title,
+        query: job.query
+      })
+    end
+
     # @return Array<Job> Returns the list of job objects
     def jobs
       jobdirs = Dir[File.join(jobsdir, "*")]
@@ -27,20 +38,17 @@ module Omoikane
     end
 
     # @return Job Returns a minimally hydrated Job object, enough to know the job's status.
-    def job_status(jobid)
-      find_job(jobid)
-    end
-
-    # @return Array<Array<String>> Returns the n'th page of results for this job, or raises JobNotFinished.
-    def job_results(jobid, page, page_size)
-      job = find_job(jobid)
-      job.results(page, page_size)
+    def job_status(jobid, page=1, rows_per_page=25)
+      find_job(jobid, page, rows_per_page)
     end
 
     private
 
-    def find_job(jobid)
-      attributes = mapper.hash_for_job(File.join(jobsdir, jobid))
+    def find_job(jobid, page=1, rows_per_page=25)
+      raise ArgumentError, "page must be >= 1, received #{page.inspect}" unless page >= 1
+      raise ArgumentError, "rows_per_page must be > 1, received #{rows_per_page.inspect}" unless rows_per_page > 1
+
+      attributes = mapper.hash_for_job(File.join(jobsdir, jobid), page, rows_per_page)
       Omoikane::Job.new(attributes)
     end
   end

@@ -1,8 +1,8 @@
 # Omoikane
 
 [Omoikane is the God of Knowledge in the Shinto religion](https://en.wikipedia.org/wiki/Omoikane_(Shinto)). The Omoikane
-application is an Ember.JS application designed to run queries against a specific server. The backend runs Sinatra and
-uses the Sequel library to connect. All data is browseable online, and results can be easily exported as CSV.
+application is simple Sinatra application designed to run queries against a specific server. All data is browseable
+online, and results can be easily exported as CSV.
 
 # License
 

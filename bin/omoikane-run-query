@@ -41,7 +41,7 @@ function explain_query {
 
   record_state_change "explaining"
 
-  ${PSQL_PATH} --no-psqlrc --file=${EXPLAIN_QUERY_PATH} > ${EXPLAIN_STDOUT_PATH} 2> >( /usr/bin/tee -a ${EXPLAIN_STDERR_PATH} )
+  ${PSQL_PATH} --no-psqlrc --file=${EXPLAIN_QUERY_PATH} > ${EXPLAIN_STDOUT_PATH} 2> ${EXPLAIN_STDERR_PATH}
   if [[ $? -gt 0 ]]
   then
     record_state_change "errored-explain"
@@ -50,13 +50,14 @@ function explain_query {
 }
 
 function run_query {
-  /bin/echo "COPY ("                                                     > ${RUN_QUERY_PATH}
+  /bin/echo "\set ON_ERROR_STOP on"                                      > ${RUN_QUERY_PATH}
+  /bin/echo "COPY ("                                                    >> ${RUN_QUERY_PATH}
   /bin/cat ${QUERY_FILE_PATH}                                           >> ${RUN_QUERY_PATH}
   /bin/echo ") TO stdout WITH (FORMAT csv, HEADER true, DELIMITER ',')" >> ${RUN_QUERY_PATH}
 
   record_state_change "running"
 
-  ${PSQL_PATH} --no-psqlrc --file=${RUN_QUERY_PATH} 2> >( /usr/bin/tee -a ${RUN_STDERR_PATH} ) | /bin/gzip > ${RUN_STDOUT_PATH}.gz
+  ${PSQL_PATH} --no-psqlrc --set="ON_ERROR_STOP=on" --file=${RUN_QUERY_PATH} 2> ${RUN_STDERR_PATH} | /bin/gzip > ${RUN_STDOUT_PATH}.gz
   if [[ $? -gt 0 ]]
   then
     record_state_change "errored-running"
