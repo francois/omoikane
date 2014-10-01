@@ -62,6 +62,10 @@ module Omoikane
       File.open(path(jobdir, "query.sql"), "w") {|io| io.puts hash.fetch(:query)}
     end
 
+    def job_results_path(jobdir)
+      path(jobdir, "results.csv.gz")
+    end
+
     private
 
     def path(jobdir, filename)

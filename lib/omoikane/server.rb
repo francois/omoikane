@@ -43,6 +43,12 @@ module Omoikane
       redirect "/query/#{id}"
     end
 
+    get "/query/:id.csv" do
+      results_path = controller.job_results_path(params[:id])
+      headers "Content-Encoding" => "gzip"
+      send_file results_path, disposition: :attachment
+    end
+
     get "/query/:id" do
       @job = controller.job_status(params[:id])
       erb :status, layout: :layout
@@ -70,6 +76,7 @@ module Omoikane
         when "running"    ; "fi-refresh"
         when "explaining" ; "fi-refresh"
         when "queued"     ; "fi-clock"
+        when /^errored-/  ; "fi-error"
         else              ; "fi-first-aid"
         end
       end

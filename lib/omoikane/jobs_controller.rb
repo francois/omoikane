@@ -42,6 +42,11 @@ module Omoikane
       find_job(jobid, page, rows_per_page)
     end
 
+    def job_results_path(jobid)
+      jobdir = File.join(jobsdir, jobid)
+      mapper.job_results_path(jobdir)
+    end
+
     private
 
     def find_job(jobid, page=1, rows_per_page=25)
