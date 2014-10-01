@@ -66,10 +66,11 @@ module Omoikane
 
       def job_state_css_class(state)
         case state
-        when "finished" ; "fi-folder"
-        when "running"  ; "fi-refresh"
-        when "queued"   ; "fi-clock"
-        else            ; "fi-first-aid"
+        when "finished"   ; "fi-folder"
+        when "running"    ; "fi-refresh"
+        when "explaining" ; "fi-refresh"
+        when "queued"     ; "fi-clock"
+        else              ; "fi-first-aid"
         end
       end
 
