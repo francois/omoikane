@@ -1,7 +1,7 @@
 <h1><%=h job.title %></h1>
 <h6>
   <span title="<%=h job.current_state %>"><i class="<%= job_state_css_class(job.current_state) %>"></i></span>
-  <span class="timestamp"><%=format_timestamp job.updated_at  %></span>
+  <span class="timestamp"><%=format_timestamp job.updated_at %></span>,
   by <span class="author"><%=h job.author %></span>
 </h6>
 

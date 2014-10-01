@@ -78,11 +78,32 @@ module Omoikane
       end
 
       def format_timestamp(timestamp)
-        %Q(<span title="#{ tz.utc_to_local(timestamp).strftime("%Y-%m-%d %H:%M") }">#{ tz.utc_to_local(timestamp).strftime("%H:%M") }</span>)
+        if Time.now.utc < (Date.today - 7).to_time then
+          %Q(<span title="#{ tz.utc_to_local(timestamp).strftime("%Y-%m-%d %H:%M") }">#{ tz.utc_to_local(timestamp).strftime("%b %d, %H:%M") }</span>)
+        elsif Time.now.utc < (Date.today - 1).to_time then
+          %Q(<span title="#{ tz.utc_to_local(timestamp).strftime("%Y-%m-%d %H:%M") }">#{ tz.utc_to_local(timestamp).strftime("%a, %H:%M") }</span>)
+        else
+          %Q(<span title="#{ tz.utc_to_local(timestamp).strftime("%Y-%m-%d %H:%M") }">#{ time_ago_in_words(timestamp) }</span>)
+        end
       end
 
       def h(str)
         CGI.escape_html(str.to_s)
+      end
+
+      def time_ago_in_words(timestamp)
+        delta_seconds = Time.now.utc - timestamp
+
+        case delta_seconds
+        when 0...45                                ; "less than a minute ago"
+        when 45...90                               ; "a minute ago"
+        when 90...(30 * 60)                        ; "%d minute ago" % [ delta_seconds / 60 ]
+        when (30 * 60)...(90 * 60)                 ; "an hour ago"
+        when (90 * 60)...(24 * 60 * 60)            ; "%d hours ago" % [ delta_seconds / 3600 ]
+        when (24 * 60 * 60)...(2 * 24 * 60 * 60) ; "a day ago"
+        else
+          "%d days ago" % [ delta_seconds / 3600 / 24 ]
+        end
       end
 
       def vm
