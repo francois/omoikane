@@ -4,7 +4,7 @@ require "omoikane/job_mapper"
 require "omoikane/jobs_controller"
 
 module Omoikane
-  class App < Sinatra::Base
+  class Server < Sinatra::Base
     enable :logging
     set :views, File.expand_path("../../../views", __FILE__)
 
