@@ -51,7 +51,9 @@ Omoikane.boot = function() {
   var appKey = $("meta[name='x-omoikane-pusher-app-key']").attr("content")
   var author = $("meta[name='x-omoikane-author']").attr("content")
 
-  if (Omoikane.arePushNotificationsEnabled()) {
+  if (appKey === undefined) {
+    $("#welcome").show();
+  } else if (Omoikane.arePushNotificationsEnabled()) {
     $("#push-notifications-enabled").show();
     Omoikane.connectForPushNotifications(appKey, author)
   } else {
