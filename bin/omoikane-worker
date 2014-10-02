@@ -2,6 +2,8 @@
 require "bundler"
 Bundler.require :default, :worker
 
+$LOAD_PATH.unshift File.expand_path("../lib", __FILE__)
+
 def usage(message)
   STDERR.puts <<-EOF.gsub(/^ {4}/, "")
     Usage: #{File.basename($0)}
