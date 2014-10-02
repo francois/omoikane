@@ -28,7 +28,7 @@ ROWS_COUNT_PATH=${JOBDIR}/rows-count.csv
 function push_client_notification {
   if [[ ! -z ${NOTIFICATION_PUSHER_URL} ]]
   then
-    bin/push-client-notification ${JOBDIR}
+    exec bin/push-client-notification ${JOBDIR}
   else
     /bin/echo "Push notifications disabled because the NOTIFICATION_PUSHER_URL environment variable is empty"
   fi
