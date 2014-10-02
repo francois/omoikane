@@ -16,15 +16,22 @@ GEM
     foreman (0.75.0)
       dotenv (~> 0.11.1)
       thor (~> 0.19.1)
+    httpclient (2.4.0)
     i18n (0.6.11)
     json (1.8.1)
     macaddr (1.7.1)
       systemu (~> 2.6.2)
     minitest (5.4.2)
+    multi_json (1.10.1)
     oj (2.10.2)
+    pusher (0.14.1)
+      httpclient (~> 2.3)
+      multi_json (~> 1.0)
+      signature (~> 0.1.6)
     rack (1.5.2)
     rack-protection (1.5.3)
       rack
+    signature (0.1.7)
     sinatra (1.4.5)
       rack (~> 1.4)
       rack-protection (~> 1.4)
@@ -50,6 +57,7 @@ DEPENDENCIES
   escape
   foreman
   oj
+  pusher
   sinatra
   thin
   tzinfo

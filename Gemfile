@@ -15,3 +15,7 @@ end
 group :worker do
   gem "activesupport", require: false
 end
+
+group :notifier do
+  gem "pusher"
+end

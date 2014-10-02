@@ -6,6 +6,10 @@ require "omoikane/jobs_controller"
 module Omoikane
   class Server < Sinatra::Base
     enable :logging
+
+    enable :sessions
+    set :session_secret, ENV["SESSION_SECRET"] if ENV["SESSION_SECRET"]
+
     set :views, File.expand_path("../../../views", __FILE__)
 
     configure do
@@ -27,12 +31,12 @@ module Omoikane
     end
 
     get "/" do
-      erb :home, layout: :layout
+      erb :home, layout: :layout, locals: { pusher_app_key: pusher_app_key }
     end
 
     get "/queries/new" do
       @job = Job.new(author: session[:author] || "", query: "", title: "")
-      erb :editor, layout: :layout
+      erb :editor, layout: :layout, locals: { pusher_app_key: pusher_app_key }
     end
 
     post "/queries" do
@@ -40,7 +44,14 @@ module Omoikane
       id = UUID.generate
       job = Job.new(title: query[:title], author: query[:author], query: query[:sql], id: id)
       controller.submit_job(id, job)
+
+      session[:author] = job.author
       redirect "/query/#{id}"
+    end
+
+    get "/query/:id" do
+      @job = controller.job_status(params[:id])
+      erb :status, layout: :layout
     end
 
     get "/query/:id.csv" do
@@ -53,22 +64,9 @@ module Omoikane
         type: :csv
     end
 
-    get "/query/:id" do
-      @job = controller.job_status(params[:id])
-      erb :status, layout: :layout
-    end
-
     get "/query/:id/edit" do
       @job = controller.job_status(params[:id])
       erb :editor, layout: :layout
-    end
-
-    post "/query/:id" do
-      query = params[:query]
-      id = params[:id]
-      job = Job.new(title: query[:title], author: query[:author], query: query[:sql], id: id)
-      controller.submit_job(id, job)
-      redirect "/query/#{id}"
     end
 
     helpers do
@@ -124,6 +122,10 @@ module Omoikane
 
       def vm
         @vm ||= OpenStruct.new(jobs: controller.jobs.first(25))
+      end
+
+      def pusher_app_key
+        ENV["PUSHER_APP_KEY"]
       end
     end
   end

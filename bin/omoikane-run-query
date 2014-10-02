@@ -25,6 +25,15 @@ RUN_STDERR_PATH=${JOBDIR}/run-query-stderr.txt
 ROWS_COUNT_PATH=${JOBDIR}/rows-count.csv
 /bin/rm --force ${RUN_STDOUT_PATH} ${RUN_STDERR_PATH} ${ROWS_COUNT_PATH}
 
+function push_client_notification {
+  if [[ ! -z ${NOTIFICATION_PUSHER_URL} ]]
+  then
+    bin/push-client-notification ${JOBDIR}
+  else
+    /bin/echo "Push notifications disabled because the NOTIFICATION_PUSHER_URL environment variable is empty"
+  fi
+}
+
 function record_state_change {
   local new_state
   new_state=${1?Missing new_state for "record_state_change" function}
@@ -47,6 +56,7 @@ function explain_query {
   if [[ $? -gt 0 ]]
   then
     record_state_change "errored-explain"
+    push_client_notification
     exit 1
   fi
 }
@@ -64,6 +74,7 @@ function run_query {
   if [[ $? -gt 0 ]]
   then
     record_state_change "errored-running"
+    push_client_notification
     exit 1
   fi
 }
@@ -77,3 +88,4 @@ explain_query
 run_query
 count_result_rows
 record_state_change "finished"
+push_client_notification

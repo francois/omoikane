@@ -1,0 +1,25 @@
+#!/usr/bin/env ruby
+require "pusher"
+
+require "omoikane/job_mapper"
+require "omoikane/job"
+
+PUSHER_URL = ENV["NOTIFICATION_PUSHER_URL"]
+exit 1 unless PUSHER_URL
+
+JOBDIR = ARGV.shift
+exit 2 unless JOBDIR
+exit 2 unless File.directory?(JOBDIR)
+
+Pusher.url = PUSHER_URL
+
+mapper = Omoikane::JobMapper.new
+job = Omoikane::Job.new(mapper.hash_for_job(JOBDIR, 1, 1))
+
+Pusher[ job.author ].trigger(
+  "finished-or-errored",
+  message: %Q(Job "#{job.title}" #{job.finished? ? "finished" : "errored"} in #{"%.1f" % [ job.elapsed_seconds / 60.0 ]}s),
+  jobid: job.id,
+  state: job.current_state)
+
+exit 0

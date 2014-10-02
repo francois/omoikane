@@ -4,6 +4,29 @@
 application is simple Sinatra application designed to run queries against a specific server. All data is browseable
 online, and results can be easily exported as CSV.
 
+# Installation
+
+Clone the directory somewhere.
+
+# Configuration
+
+* `SESSION_SECRET`: Run `dd if=/dev/random of=- bs=1024 count=1 | sha256sum` and use the results as your secret;
+* `JOBSDIR`: Create a directory in which Omoikane can store all it's application files;
+* `PSQL_PATH`: Set to your local `psql` installation, usually `/usr/bin/psql`;
+* `RUBYOPT`: Set to `-Ilib`.
+
+# Notifications
+
+If you wish to provide push notifications for your users, open a free account at [Pusher](https://pusher.com/). With
+your credentials, create two new environment variables, with the values Pusher will provide you:
+
+* `PUSHER_APP_KEY`
+* `NOTIFICATION_PUSHER_URL`
+
+Once those variables are available in the environment, direct your users to the home page of Omoikane, where they
+can enable push notifications for themselves. Push notifications are directed to only the person which made the query.
+When John submits a job, Jane won't be notified that the job has completed.
+
 # License
 
 Omoikane is released as open source software, under the 3 clause BSD license.

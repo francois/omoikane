@@ -1,5 +1,6 @@
-require "csv"
 require "oj"
+require "csv"
+require "escape"
 require "active_support/core_ext/hash/keys" # Hash#symbolize_keys
 
 module Omoikane
