@@ -25,6 +25,7 @@ package{[
   'erlang',
   'build-essential',
   'htop',
+  'ntp',
 ]:
   ensure => latest,
 }
