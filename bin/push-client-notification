@@ -1,4 +1,7 @@
 #!/usr/bin/env ruby
+require "bundler"
+Bundler.require :default, :notifier
+
 require "pusher"
 
 require "omoikane/job_mapper"

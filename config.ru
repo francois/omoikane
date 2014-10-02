@@ -1,3 +1,4 @@
+require "bundler"
 Bundler.require :default, :server
 
 require "omoikane/server"

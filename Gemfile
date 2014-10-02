@@ -1,7 +1,8 @@
 source "https://rubygems.org"
 ruby "2.1.3"
 
-gem "foreman", group: :unused
+gem "bundler"
+gem "foreman", group: :development
 gem "oj"
 
 group :server do

@@ -54,6 +54,7 @@ PLATFORMS
 
 DEPENDENCIES
   activesupport
+  bundler
   escape
   foreman
   oj
