@@ -49,11 +49,7 @@ module Omoikane
       redirect "/query/#{id}"
     end
 
-    get "/query/:id" do
-      @job = controller.job_status(params[:id])
-      erb :status, layout: :layout
-    end
-
+    # This route MUST come before /:id, or else Sinatra matches /:id and we fail to return anything
     get "/query/:id.csv" do
       @job = controller.job_status(params[:id])
       results_path = controller.job_results_path(params[:id])
@@ -62,6 +58,11 @@ module Omoikane
         disposition: :attachment,
         filename: "#{@job.id}.csv",
         type: :csv
+    end
+
+    get "/query/:id" do
+      @job = controller.job_status(params[:id])
+      erb :status, layout: :layout
     end
 
     get "/query/:id/edit" do
