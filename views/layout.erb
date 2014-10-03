@@ -7,7 +7,8 @@
   <link rel="stylesheet" href="/css/foundation.min.css" />
   <link rel="stylesheet" href="/css/foundation-icons.css" />
   <link rel="stylesheet" href="/css/omoikane.css" />
-  <link rel="stylesheet" href="/css/solarized_light.css">
+  <link rel="stylesheet" href="/css/solarized_light.css" />
+  <link rel="stylesheet" href="/css/c3.css" />
   <script src="/js/vendor/modernizr.js"></script>
   <% if session[:author] then %>
     <meta name="x-omoikane-author" content="<%=h session[:author] %>" />
@@ -70,11 +71,13 @@
     </div>
   </div>
 
-  <script src="/js/libs/jquery-1.10.2.js"></script>
+  <script src="/js/jquery-2.1.1.min.js"></script>
   <script src="/js/moment.min.js"></script>
   <script src="/js/foundation.min.js"></script>
   <script src="/js/highlight.pack.js"></script>
-  <script src="//js.pusher.com/2.2/pusher.min.js" type="text/javascript"></script>
+  <script src="/js/pusher.min.js" type="text/javascript"></script>
+  <script src="/js/d3.min.js" charset="utf-8"></script>
+  <script src="/js/c3.min.js"></script>
 
   <!-- required to be last, since we initialize highlight.js in it -->
   <script src="/js/app.js"></script>
