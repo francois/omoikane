@@ -6,7 +6,8 @@
 </h6>
 
 <% if job.has_results? && job.rows_count.nonzero? then %>
-  <% if (2..100).include?(job.rows_count) && (2..6).include?(job.columns.size) then %>
+  <%# 101 because the header row is included in the count %>
+  <% if (2..101).include?(job.rows_count) && (2..6).include?(job.columns.size) then %>
     <div id="graph-container" style="display:none">
       <h2>Graph</h2>
       <div id="graph"></div>
