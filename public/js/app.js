@@ -62,19 +62,23 @@ Omoikane.drawResultsGraph = function(element, results, callback) {
     }
   }
 
-  data.push(["x"]);
-  for(j = rowHeadersCount; j < colsCount; j++) {
-    data[0].push( columnHeaders[j] );
-  }
+  Omoikane.cellValues = cellValues;
+  Omoikane.data = data;
 
+  data.push(["x"]);
   for(i = 0; i < rowsCount; i++) {
     var header = cellValues.slice( colsCount * i, colsCount * i + rowHeadersCount ).toArray().join(" ");
-    data.push([header]);
+    data[0].push(header);
+  }
+
+  for(i = rowHeadersCount; i < colsCount; i++) {
+    data.push([columnHeaders[i]]);
   }
 
   for(j = rowHeadersCount; j < colsCount; j++) {
     for(i = 0; i < rowsCount; i++) {
-      data[i + 1].push(cellValues[ (colsCount * i) + j]);
+      var value = cellValues[ colsCount * i + j];
+      data[j - rowHeadersCount + 1][i + 1] = value;
     }
   }
 
