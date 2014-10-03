@@ -25,8 +25,8 @@
       </tr>
     </thead>
     <tbody>
-      <% job.results.each do |row| %>
-        <tr>
+      <% job.results.each_with_index do |row, index| %>
+        <tr style="<%= "display:none" if index > 50 %>">
           <% job.columns.each_with_index do |_, i| %>
             <td><%=h row[i] %></td>
           <% end %>

@@ -61,7 +61,7 @@ module Omoikane
     end
 
     get "/query/:id" do
-      @job = controller.job_status(params[:id])
+      @job = controller.job_status(params[:id], 1, 200)
       erb :status, layout: :layout
     end
 

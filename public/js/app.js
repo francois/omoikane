@@ -54,6 +54,7 @@ Omoikane.drawResultsGraph = function(element, results, callback) {
     , rowHeadersCount
     , cells = results.find("tbody td")
     , cellValues = cells.map(function(_, td) { return td.innerText; })
+    , options = {}
     , i, j, data = [];
 
   for(j = 0; j < colsCount; j++) {
@@ -61,9 +62,6 @@ Omoikane.drawResultsGraph = function(element, results, callback) {
       rowHeadersCount = j + 1;
     }
   }
-
-  Omoikane.cellValues = cellValues;
-  Omoikane.data = data;
 
   data.push(["x"]);
   for(i = 0; i < rowsCount; i++) {
@@ -82,7 +80,7 @@ Omoikane.drawResultsGraph = function(element, results, callback) {
     }
   }
 
-  var chart = c3.generate({
+  options = {
     bindto: element,
     data: {
       x: 'x',
@@ -113,7 +111,15 @@ Omoikane.drawResultsGraph = function(element, results, callback) {
         ratio: 0.5
       }
     }
-  });
+  }
+
+  if (rowsCount > 10) options.data.type = 'line';
+  if (rowHeadersCount === 1 && cellValues[0].match(/^\d{4}(.)\d{2}\1\d{2}/)) {
+    options.data.type = 'spline';
+    options.axis.x.type = 'timeseries';
+  }
+
+  var chart = c3.generate(options);
 
   callback();
 }
