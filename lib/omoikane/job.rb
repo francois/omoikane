@@ -56,7 +56,7 @@ module Omoikane
     end
 
     def title
-      attributes[:title] || attributes.fetch(:query).gsub("\n", " ")
+      attributes[:title] || attributes.fetch(:query).gsub(/[\r\n]/, " ").gsub("  ", " ")
     end
 
     def rows_count
