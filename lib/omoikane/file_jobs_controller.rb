@@ -5,7 +5,7 @@ module Omoikane
   # A Facade to the jobs directory.
   #
   # Implements a simple and efficient API for the app server to use.
-  class JobsController
+  class FileJobsController
     def initialize(jobsdir, mapper)
       @jobsdir = jobsdir
       @mapper  = mapper

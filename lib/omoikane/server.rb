@@ -1,7 +1,7 @@
 require "cgi"
 require "sinatra/base"
-require "omoikane/job_mapper"
-require "omoikane/jobs_controller"
+require "omoikane/file_job_mapper"
+require "omoikane/file_jobs_controller"
 
 module Omoikane
   class Server < Sinatra::Base
@@ -19,11 +19,11 @@ module Omoikane
     end
 
     def mapper
-      @mapper ||= Omoikane::JobMapper.new
+      @mapper ||= Omoikane::FileJobMapper.new
     end
 
     def controller
-      @controller ||= Omoikane::JobsController.new(JOBSDIR, mapper)
+      @controller ||= Omoikane::FileJobsController.new(JOBSDIR, mapper)
     end
 
     def tz

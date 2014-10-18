@@ -5,7 +5,7 @@ require "active_support/core_ext/hash/keys" # Hash#symbolize_keys
 
 module Omoikane
   # Implements a Data Mapper for disk-based jobs to in-memory Job objects
-  class JobMapper
+  class FileJobMapper
     def hash_for_job(jobdir, page, rows_per_page)
       state_changes  = read_state_changes(jobdir)
       current_status = state_changes.last.last
