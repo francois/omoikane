@@ -55,6 +55,8 @@ module Omoikane
 
       attributes = mapper.hash_for_job(File.join(jobsdir, jobid), page, rows_per_page)
       Omoikane::Job.new(attributes)
+    rescue CSV::MalformedCSVError => e
+      Omoikane::Job.new(title: "FAIL - #{e.class}: #{e.message}", id: jobid, current_state: "errored", updated_at: Time.now.utc, author: "UNKNOWN")
     end
   end
 end
