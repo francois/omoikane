@@ -19,7 +19,6 @@ package{[
   'libpq-dev',
   'libpq5',
   'git',
-  'nodejs',
   'daemontools',
   'rabbitmq-server',
   'erlang',
@@ -28,6 +27,13 @@ package{[
   'ntp',
 ]:
   ensure => latest,
+}
+
+package{[
+  'node',
+  'nodejs',
+]:
+  ensure => absent,
 }
 
 exec{'/usr/local/bin/ruby -S gem install --no-rdoc --no-ri bundler':
@@ -88,4 +94,41 @@ exec{'install-ruby':
   creates => '/usr/local/bin/ruby',
   require => Package['build-essential'],
   timeout => 0, # disregard timeout
+}
+
+$node_version = 'v0.10.33'
+exec{'download-node':
+  command => "/usr/bin/wget --quiet -O /usr/local/src/node-${node_version}-linux-x64.tar.gz http://nodejs.org/dist/${node_version}/node-${node_version}-linux-x64.tar.gz",
+  creates => "/usr/local/src/node-${node_version}-linux-x64.tar.gz",
+}
+
+exec{'extract-node':
+  command => "/bin/tar --extract --gunzip --file node-${node_version}-linux-x64.tar.gz --directory /usr/local",
+  cwd     => '/usr/local/src',
+  creates => "/usr/local/node-${node_version}-linux-x64/bin/node",
+  require => Exec['download-node'],
+}
+
+file{'/usr/local/node':
+  ensure  => link,
+  target  => "/usr/local/node-${node_version}-linux-x64",
+  require => Exec['extract-node'],
+}
+
+exec{'install ember-cli':
+  command => '/usr/local/node/bin/npm install -g ember-cli',
+  creates => '/usr/local/node/lib/node_modules/ember-cli',
+  require => File['/usr/local/node'],
+}
+
+exec{'install bower':
+  command => '/usr/local/node/bin/npm install -g bower',
+  creates => '/usr/local/node/lib/node_modules/bower',
+  require => File['/usr/local/node'],
+}
+
+exec{'install phantomjs':
+  command => '/usr/local/node/bin/npm install -g phantomjs',
+  creates => '/usr/local/node/lib/node_modules/phantomjs',
+  require => File['/usr/local/node'],
 }
