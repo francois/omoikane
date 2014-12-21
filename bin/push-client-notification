@@ -5,7 +5,7 @@ Bundler.require :default, :notifier
 require "pusher"
 
 $LOAD_PATH.unshift File.expand_path("../../lib", __FILE__)
-require "omoikane/job_mapper"
+require "omoikane/file_job_mapper"
 require "omoikane/job"
 
 PUSHER_URL = ENV["NOTIFICATION_PUSHER_URL"]

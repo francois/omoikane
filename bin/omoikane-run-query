@@ -2,6 +2,8 @@
 JOBDIR=${1?Missing JOBDIR as 1st argument}
 if [[ ! -d ${JOBDIR} ]] ; then exit 10 ; fi
 
+JOBSDB=${2?Missing JOBSDB as 2nd argument}
+
 PSQL_PATH=/usr/bin/psql
 if [[ ! -x ${PSQL_PATH} ]] ; then exit 11 ; fi
 
@@ -43,6 +45,7 @@ function record_state_change {
 
   # record state change
   /bin/echo $( /bin/date +"%Y-%m-%dT%H:%M:%S.%N%z" ),${new_state} >> ${STATE_FILE_PATH}
+  /usr/bin/sqlite3 $JOBSDB "INSERT INTO query_states(id, updated_at, state) VALUES ('${JOBID}', '$( /bin/date +"%Y-%m-%dT%H:%M:%S.%N%z" )', '${new_state}');"
 }
 
 function explain_query {
@@ -59,6 +62,8 @@ function explain_query {
     push_client_notification
     exit 1
   fi
+
+  /usr/bin/sqlite3 $JOBSDB "UPDATE queries SET explained_at = '$( /bin/date +"%Y-%m-%dT%H:%M:%S.%N%z" )' WHERE id = '${JOBID}';"
 }
 
 function run_query {
@@ -82,6 +87,7 @@ function run_query {
 function count_result_rows {
   record_state_change "counting"
   /bin/zcat ${RUN_STDOUT_PATH} | /usr/bin/wc --lines | /usr/bin/awk '{ print $1 }' > ${ROWS_COUNT_PATH}
+  /usr/bin/sqlite3 $JOBSDB "UPDATE queries SET completed_at = '$( /bin/date +"%Y-%m-%dT%H:%M:%S.%N%z" )', rows_count = $( /bin/cat ${ROWS_COUNT_PATH} ) - 1 WHERE id = '${JOBID}';"
 }
 
 explain_query

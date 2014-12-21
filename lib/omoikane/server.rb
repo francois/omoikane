@@ -1,7 +1,8 @@
 require "cgi"
+require "logger"
+require "omoikane/database_job_mapper"
+require "omoikane/database_jobs_controller"
 require "sinatra/base"
-require "omoikane/file_job_mapper"
-require "omoikane/file_jobs_controller"
 
 module Omoikane
   class Server < Sinatra::Base
@@ -19,11 +20,15 @@ module Omoikane
     end
 
     def mapper
-      @mapper ||= Omoikane::FileJobMapper.new
+      @mapper ||= Omoikane::DatabaseJobMapper.new
+    end
+
+    def db
+      @db ||= Sequel.connect(ENV.fetch("OMOIKANE_JOBS_DATABASE_URL"), logger: Logger.new(STDERR))
     end
 
     def controller
-      @controller ||= Omoikane::FileJobsController.new(JOBSDIR, mapper)
+      @controller ||= Omoikane::DatabaseJobsController.new(db, JOBSDIR, mapper)
     end
 
     def tz

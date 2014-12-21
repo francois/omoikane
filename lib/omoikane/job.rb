@@ -23,7 +23,7 @@ module Omoikane
     def updated_at
       changes = attributes.fetch(:state_changes, [])
       last_change = changes.last
-      last_change ? Time.parse(last_change.first).utc : Time.now.utc
+      last_change ? last_change.first.utc : Time.now.utc
     end
 
     def finished?
@@ -37,9 +37,9 @@ module Omoikane
       if started_at && finished_at then
         if started_at == finished_at then
           # No state change, so we can use "now"
-          Time.now.utc - Time.parse(started_at.first).utc
+          Time.now.utc - started_at.first.utc
         else
-          Time.parse(finished_at.first).utc - Time.parse(started_at.first).utc
+          finished_at.first.utc - started_at.first.utc
         end
       else
         # This seems like an error, so 0 is a safe value

@@ -7,6 +7,15 @@ exec{'/usr/bin/apt-get upgrade -y':
 Exec['/usr/bin/apt-get upgrade -y'] -> Package <| |>
 
 package{[
+  'nodejs',
+  'daemontools',
+  'rabbitmq-server',
+  'erlang',
+]:
+  ensure => absent,
+}
+
+package{[
   'vim-nox',
   'byobu',
   'ruby-full',
@@ -19,10 +28,6 @@ package{[
   'libpq-dev',
   'libpq5',
   'git',
-  'nodejs',
-  'daemontools',
-  'rabbitmq-server',
-  'erlang',
   'build-essential',
   'htop',
   'ntp',

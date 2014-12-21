@@ -7,8 +7,9 @@ module Omoikane
   # The worker is mostly stateless: it remembers jobs it has already seen and
   # processed, but does not remember anything beyond that.
   class Worker
-    def initialize(jobsdir, jobrunner_path)
+    def initialize(jobsdir, jobsdb, jobrunner_path)
       @jobsdir = jobsdir
+      @jobsdb = jobsdb
       @jobrunner_path = jobrunner_path
       @cycle_count = 0
 
@@ -27,6 +28,9 @@ module Omoikane
 
     # The path to the directory containing jobs
     attr_reader :jobsdir
+
+    # The path to the SQLite3 database which contains the details of queries
+    attr_reader :jobsdb
 
     # Whether we're running or not
     attr_reader :running
@@ -85,7 +89,7 @@ module Omoikane
     def launch(newjobs)
       newjobs.each do |jobdir|
         self.known << jobdir
-        pid = fork { exec(jobrunner_path, jobdir) }
+        pid = fork { exec(jobrunner_path, jobdir, jobsdb) }
         logger.info "Launched #{jobdir.inspect} as #{pid}"
       end
     end
