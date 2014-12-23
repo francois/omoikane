@@ -1,0 +1,66 @@
+<div class="row">
+  <div class="small-12 columns">
+    <h1><%=h truncate(job.title) %></h1>
+    <h6>
+      <span title="<%=h job.current_state %>"><i class="<%= job_state_css_class(job.current_state) %>"></i></span>
+      <span class="timestamp"><%=format_timestamp job.updated_at %></span>,
+      by <span class="author"><%=h job.author %></span><% if job.finished? then %>, in <span class="elapsed"><%=format_elapsed job.elapsed_seconds / 60.0 %> minutes</span><% end %>
+  </h6>
+
+  <% if job.has_results? && job.rows_count.nonzero? then %>
+    <%# 101 because the header row is included in the count %>
+    <% if (2..101).include?(job.rows_count) && (2..6).include?(job.columns.size) then %>
+      <div id="graph-container" style="display:none">
+        <h2>Graph</h2>
+        <div id="graph"></div>
+      </div>
+    <% end %>
+
+    <a href="/query/<%=h job.id %>.csv" class="button tiny right"><i class="fi-page-export-csv"></i> Download as CSV</a>
+    <a href="#" id="graph-this" style="display:none" class="button right tiny secondary"><i class="fi-graph-bar"></i> Graph this!</a>
+    <h2>Results</h2>
+    <table id="results" class="table">
+      <thead>
+        <tr>
+          <% job.columns.each do |name| %>
+            <th><%=h name %></th>
+          <% end %>
+        </tr>
+      </thead>
+      <tbody>
+        <% job.results.each_with_index do |row, index| %>
+          <tr style="<%= "display:none" if index > 50 %>">
+            <% job.columns.each_with_index do |_, i| %>
+              <td><%=h row[i] %></td>
+            <% end %>
+          </tr>
+        <% end %>
+      </tbody>
+      <tfoot>
+        <tr>
+          <th scope="row" colspan="<%=h job.columns.size %>">Total Rows: <%=h job.rows_count %></th>
+        </tr>
+      </tfoot>
+    </table>
+  <% end %>
+
+  <% if job.query_error.respond_to?(:empty?) && !job.query_error.empty? then %>
+    <h2>Errors</h2>
+  <pre><%=h job.query_error %></pre>
+  <% end %>
+
+  <h2>Query</h2>
+  <pre><code class="language-sql"><%=h job.query %></code></pre>
+  <br>
+  <p>
+  <a href="/query/<%=h job.id %>/edit" class="button">Edit</a>
+  <a href="/queries/new" class="button secondary">New Query</a>
+  <a href="/" class="button secondary">Back to list</a>
+  </p>
+
+  <% if job.query_plan.respond_to?(:empty?) && !job.query_plan.empty? then %>
+    <h2>Plan</h2>
+    <pre><%=h job.query_plan %></pre>
+  <% end %>
+</div>
+</div>

@@ -1,9 +1,8 @@
-.jobs i {
-  float: right;
+.job-state {
   padding-top: 2px;
 }
 
-.jobs p {
+.jobs-list p {
   margin-bottom: 0;
 }
 
@@ -15,7 +14,6 @@ textarea {
   text-transform: capitalize;
 }
 
-#graph {
-  width: 100%;
-  height: 350px;
+.delete .button.alert {
+  top: -90px;
 }

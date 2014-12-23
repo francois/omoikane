@@ -1,7 +1,5 @@
 require "cgi"
 require "logger"
-require "omoikane/database_job_mapper"
-require "omoikane/database_jobs_controller"
 require "sinatra/base"
 
 module Omoikane
@@ -13,49 +11,148 @@ module Omoikane
 
     set :views, File.expand_path("../../../views", __FILE__)
 
-    configure do
-      JOBSDIR = ENV["JOBSDIR"]
-      raise "JOBSDIR not passed on command line: won't continue" unless JOBSDIR
-      raise "JOBSDIR is set to #{JOBSDIR.inspect}, but is not a directory: won't continue" unless File.directory?(JOBSDIR)
-    end
-
-    def mapper
-      @mapper ||= Omoikane::DatabaseJobMapper.new
-    end
-
-    def db
-      @db ||= Sequel.connect(ENV.fetch("OMOIKANE_JOBS_DATABASE_URL"), logger: Logger.new(STDERR))
-    end
-
-    def controller
-      @controller ||= Omoikane::DatabaseJobsController.new(db, JOBSDIR, mapper)
-    end
-
     def tz
       @tz ||= TZInfo::Timezone.get("America/Montreal")
     end
 
     get "/" do
-      erb :home, layout: :layout, locals: { pusher_app_key: pusher_app_key }
+      erb :home
     end
+
+    #
+    # Queries
+    #
 
     get "/queries/new" do
-      @job = Job.new(author: session[:author] || "", query: "", title: "")
-      erb :editor, layout: :layout, locals: { pusher_app_key: pusher_app_key }
+      @query = OpenStruct.new()
+      erb :edit_query, layout: :layout
     end
 
-    post "/queries" do
-      query = params[:query]
-      id = UUID.generate
-      job = Job.new(title: query[:title], author: query[:author], query: query[:sql], id: id)
-      controller.submit_job(id, job)
+    get "/query/:id/edit" do
+      @query = OpenStruct.new(
+        persisted?: true,
+        title: "validate participants",
+        author: "francois",
+        sql: "SELECT count(*) FROM ...")
+      erb :edit_query, layout: :layout
+    end
 
-      session[:author] = job.author
-      redirect "/query/#{id}"
+    #
+    # Projects
+    #
+
+    get "/projects" do
+      erb :projects, layout: :layout
+    end
+
+    get "/projects/new" do
+      @project = OpenStruct.new()
+      erb :edit_project, layout: :layout
+    end
+
+    get "/project/:id/edit" do
+      @project = OpenStruct.new(
+        id: UUID.generate,
+        title: "Netflix EOM",
+        instructions: "Use this every first Monday of the month, to calculate Netflix's report. Fill in the parameters this way:\n\n* start_on: ...\n* end_on: ...\n",
+        notes: "Internal notes for R&D people, not for people who will submit the project.",
+        author: "pablo",
+        persisted?: true,
+        queries: [
+          OpenStruct.new(title: "participants", sql: "SELECT count(DISTINCT persona_service_id) FROM ... WHERE market_id = 'france' AND daily_start_on BETWEEN :start_on AND :end_on"),
+          OpenStruct.new(title: "interactions", sql: "SELECT count(*) FROM ... WHERE market_id = 'france' AND daily_start_on BETWEEN :start_on AND :end_on"),
+        ]
+      )
+      erb :edit_project, layout: :layout
+    end
+
+    post "/project/:id" do
+      redirect "/project/#{params[:id]}/edit"
+    end
+
+    get "/project/:id/queries/new" do
+      @query = OpenStruct.new(
+        persisted?: false,
+        project_title: "Netflix EOM")
+      erb :edit_project_query, layout: :layout
+    end
+
+    get "/project/:project_id/query/:id/edit" do
+      @query = OpenStruct.new(
+        persisted?: true,
+        project_title: "Netflix EOM",
+        title: "participants",
+        sql: "SELECT\n    weekly_start_on\n  , count(DISTINCT persona_service_id || service_name)\nFROM show_interaction_bindings\nWHERE market_id = 'france'\n  AND daily_start_on BETWEEN :start_on AND :end_on\nGROUP BY weekly_start_on\nORDER BY weekly_start_on\n",
+        notes: "Internal notes for the R&D specialist that works on this query")
+      erb :edit_project_query, layout: :layout
+    end
+
+    post "/project/:project_id/queries" do
+      # create
+      redirect "/project/#{params[:project_id]}/edit"
+    end
+
+    post "/project/:project_id/query/:id" do
+      # update
+      redirect "/project/#{params[:project_id]}/edit"
+    end
+
+    delete "/project/:project_id/query/:id" do
+      # delete
+      redirect "/project/#{params[:project_id]}/edit"
+    end
+
+    get "/project/:id/runs/new" do
+      @run = OpenStruct.new(
+        id: UUID.generate,
+        project_title: "Netflix EOM",
+        project_instructions: "Use this every first Monday of the month, to calculate Netflix's report. Fill in the parameters this way:\n\n* start_on: ...\n* end_on: ...\n",
+        project_notes: "Internal notes for R&D people, not for people who will submit the project.",
+        subtitle: params[:run_id] ? "december 2014" : nil,
+        submitter: params[:run_id] ? "cecile" : nil,
+        persisted?: false,
+        number_of_queries: 2,
+        parameters: %w(start_on end_on start_at end_at category_name))
+      erb :new_run, layout: :layout
+    end
+
+    post "/project/:id/runs" do
+      # post
+      redirect "/run/1234"
+    end
+
+    get "/run/:id" do
+      @run = OpenStruct.new(
+        id: UUID.generate,
+        project_title: "Netflix EOM",
+        project_instructions: "Use this every first Monday of the month, to calculate Netflix's report. Fill in the parameters this way:\n\n* start_on: ...\n* end_on: ...\n",
+        project_notes: "Internal notes for R&D people, not for people who will submit the project.",
+        subtitle: "december 2014",
+        submitter: "cecile",
+        persisted?: true,
+        queries: [
+          OpenStruct.new(submitted_at: "2014-12-23T19:33", current_state: "running", title: "participants", sql: "SELECT count(DISTINCT persona_service_id) FROM ... WHERE market_id = 'france' AND daily_start_on BETWEEN :start_on AND :end_on"),
+          OpenStruct.new(submitted_at: "2014-12-23T19:33", current_state: "running", title: "interactions", sql: "SELECT count(*) FROM ... WHERE market_id = 'france' AND daily_start_on BETWEEN :start_on AND :end_on"),
+        ],
+        parameters: {start_on: "2014-11-09", end_on: "2014-12-27", start_at: "2014-11-01 07:00", end_at: "2014-12-31 08:00", category_name: "sports",})
+      erb :run_status, layout: :layout
+    end
+
+    get "/download/:id" do
+      # TODO: zip all results into a single file, then stream the resulting file
+    end
+
+    #
+    # Jobs
+    #
+
+    post "/jobs" do
+      # create job
+      redirect "/job/1234"
     end
 
     # This route MUST come before /:id, or else Sinatra matches /:id and we fail to return anything
-    get "/query/:id.csv" do
+    get "/job/:id.csv" do
       @job = controller.job_status(params[:id])
       results_path = controller.job_results_path(params[:id])
       headers "Content-Encoding" => "gzip"
@@ -65,18 +162,36 @@ module Omoikane
         type: :csv
     end
 
-    get "/query/:id" do
-      @job = controller.job_status(params[:id], 1, 200)
-      erb :status, layout: :layout
+    get "/job/:id" do
+      @job = OpenStruct.new(
+        title: "Netflix EOM: participants",
+        current_state: "finished",
+        updated_at: Time.now - 17*60,
+        author: "Francois",
+        finished?: true,
+        elapsed_seconds: 189,
+        has_results?: true,
+        rows_count: 1,
+        columns: %w(count),
+        id: UUID.generate,
+        results: [%w(24123)],
+        query: "SELECT count(*) FROM ...",
+        query_error: "",
+        query_plan: "")
+
+      erb :job, layout: :layout
     end
 
-    get "/query/:id/edit" do
-      @job = controller.job_status(params[:id])
-      erb :editor, layout: :layout
+    #
+    # Search
+    #
+
+    get "/search" do
+      erb :search_results, layout: :layout
     end
 
     helpers do
-      attr_reader :job
+      attr_reader :job, :project, :query, :run
 
       def job_state_css_class(state)
         case state
@@ -126,12 +241,23 @@ module Omoikane
         "%.1f" % [ duration ]
       end
 
-      def vm
-        @vm ||= OpenStruct.new(jobs: controller.jobs.first(25))
+      def markdown(text)
+        h(text).gsub("\n", "<br>")
       end
 
       def pusher_app_key
         ENV["PUSHER_APP_KEY"]
+      end
+
+      def input_type_from_parameter_name(parameter_name)
+        case parameter_name
+        when /_on$/
+          "date"
+        when /_at$/
+          "datetime"
+        else
+          "text"
+        end
       end
     end
   end
