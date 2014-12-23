@@ -5,7 +5,6 @@ gem "bundler"
 gem "foreman", group: :development
 gem "oj"
 gem "sequel"
-gem "sqlite3"
 
 group :server do
   gem "escape"
