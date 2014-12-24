@@ -29,11 +29,13 @@ module Omoikane
 
     get "/queries/new" do
       @query = QueryForm.new(Query.new)
+      @query.author = session[:author]
       erb :edit_query, layout: :layout
     end
 
     get "/query/:id/edit" do
-      @query = QueryForm.new(Query[id: params[:id]])
+      @query = QueryForm.new(Query[query_id: params[:id]])
+      @query.author = session[:author]
       erb :edit_query, layout: :layout
     end
 
@@ -155,6 +157,7 @@ module Omoikane
           QueryState.create(query_id: query_id, updated_at: Time.now.utc, state: "submitted")
         end
 
+        session[:author] = @query.author
         redirect "/job/#{query_id}"
       else
         erb :edit_query, layout: :layout
