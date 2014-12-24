@@ -20,7 +20,9 @@ module Omoikane
     end
 
     get "/" do
-      erb :home
+      @jobs = Query.most_recent(25).
+        map{|query| JobForm.new(query: query, state_changes: query.state_changes, results: query.results || QueryResult.new)}
+      erb :queries
     end
 
     #
@@ -196,7 +198,7 @@ module Omoikane
     end
 
     helpers do
-      attr_reader :job, :project, :query, :run
+      attr_reader :job, :project, :query, :run, :jobs
 
       def job_state_css_class(state)
         case state
@@ -231,14 +233,14 @@ module Omoikane
         delta_seconds = Time.now.utc - timestamp
 
         case delta_seconds
-        when 0...45                                ; "less than a minute ago"
-        when 45...90                               ; "a minute ago"
-        when 90...(30 * 60)                        ; "%d minute ago" % [ delta_seconds / 60 ]
-        when (30 * 60)...(90 * 60)                 ; "an hour ago"
-        when (90 * 60)...(24 * 60 * 60)            ; "%d hours ago" % [ delta_seconds / 3600 ]
-        when (24 * 60 * 60)...(2 * 24 * 60 * 60) ; "a day ago"
+        when 0...45                                ; "less than a minute"
+        when 45...90                               ; "a minute"
+        when 90...(30 * 60)                        ; "%d minute" % [ delta_seconds / 60 ]
+        when (30 * 60)...(90 * 60)                 ; "an hour"
+        when (90 * 60)...(24 * 60 * 60)            ; "%d hours" % [ delta_seconds / 3600 ]
+        when (24 * 60 * 60)...(2 * 24 * 60 * 60) ; "a day"
         else
-          "%d days ago" % [ delta_seconds / 3600 / 24 ]
+          "%d days" % [ delta_seconds / 3600 / 24 ]
         end
       end
 

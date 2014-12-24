@@ -47,4 +47,8 @@ class JobForm < Reform::Form
   def current_state
     state_changes.any? ? state_changes.last.state : nil
   end
+
+  def ran_as_part_of_a_run?
+    false
+  end
 end
