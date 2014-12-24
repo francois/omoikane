@@ -1,11 +1,12 @@
 Sequel.migration do
   change do
     create_table :queries do
-      column :id, :text, primary_key: true
+      column :query_id, :text, null: false
       column :author, :text, null: false
       column :title, :text, null: false
-      column :submitted_at, :timestamp, null: false
-      column :rows_count, :integer
+      column :sql, :text, null: false
+
+      primary_key [:query_id]
     end
   end
 end

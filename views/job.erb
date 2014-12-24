@@ -16,7 +16,7 @@
       </div>
     <% end %>
 
-    <a href="/query/<%=h job.id %>.csv" class="button tiny right"><i class="fi-page-export-csv"></i> Download as CSV</a>
+    <a href="/query/<%=h job.query_id %>.csv" class="button tiny right"><i class="fi-page-export-csv"></i> Download as CSV</a>
     <a href="#" id="graph-this" style="display:none" class="button right tiny secondary"><i class="fi-graph-bar"></i> Graph this!</a>
     <h2>Results</h2>
     <table id="results" class="table">
@@ -44,23 +44,23 @@
     </table>
   <% end %>
 
-  <% if job.query_error.respond_to?(:empty?) && !job.query_error.empty? then %>
+  <% if job.errors.respond_to?(:empty?) && !job.errors.empty? then %>
     <h2>Errors</h2>
-  <pre><%=h job.query_error %></pre>
+  <pre><%=h job.errors %></pre>
   <% end %>
 
   <h2>Query</h2>
-  <pre><code class="language-sql"><%=h job.query %></code></pre>
+  <pre><code class="language-sql"><%=h job.sql %></code></pre>
   <br>
   <p>
-  <a href="/query/<%=h job.id %>/edit" class="button">Edit</a>
+  <a href="/query/<%=h job.query_id %>/edit" class="button">Edit</a>
   <a href="/queries/new" class="button secondary">New Query</a>
   <a href="/" class="button secondary">Back to list</a>
   </p>
 
-  <% if job.query_plan.respond_to?(:empty?) && !job.query_plan.empty? then %>
+  <% if job.plan.respond_to?(:empty?) && !job.plan.empty? then %>
     <h2>Plan</h2>
-    <pre><%=h job.query_plan %></pre>
+    <pre><%=h job.plan %></pre>
   <% end %>
 </div>
 </div>

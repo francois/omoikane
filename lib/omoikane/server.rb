@@ -2,6 +2,10 @@ require "cgi"
 require "logger"
 require "sinatra/base"
 
+require "models/query"
+require "forms/job_form"
+require "forms/query_form"
+
 module Omoikane
   class Server < Sinatra::Base
     enable :logging
@@ -24,16 +28,12 @@ module Omoikane
     #
 
     get "/queries/new" do
-      @query = OpenStruct.new()
+      @query = QueryForm.new(Query.new)
       erb :edit_query, layout: :layout
     end
 
     get "/query/:id/edit" do
-      @query = OpenStruct.new(
-        persisted?: true,
-        title: "validate participants",
-        author: "francois",
-        sql: "SELECT count(*) FROM ...")
+      @query = QueryForm.new(Query[id: params[:id]])
       erb :edit_query, layout: :layout
     end
 
@@ -147,8 +147,18 @@ module Omoikane
     #
 
     post "/jobs" do
-      # create job
-      redirect "/job/1234"
+      query_id = UUID.generate
+      @query = QueryForm.new(Query.new(query_id: query_id))
+      if @query.validate(params[:query]) then
+        Query.db.transaction do
+          @query.save
+          QueryState.create(query_id: query_id, updated_at: Time.now.utc, state: "submitted")
+        end
+
+        redirect "/job/#{query_id}"
+      else
+        erb :edit_query, layout: :layout
+      end
     end
 
     # This route MUST come before /:id, or else Sinatra matches /:id and we fail to return anything
@@ -158,26 +168,13 @@ module Omoikane
       headers "Content-Encoding" => "gzip"
       send_file results_path,
         disposition: :attachment,
-        filename: "#{@job.id}.csv",
+        filename: "#{@job.query_id}.csv",
         type: :csv
     end
 
     get "/job/:id" do
-      @job = OpenStruct.new(
-        title: "Netflix EOM: participants",
-        current_state: "finished",
-        updated_at: Time.now - 17*60,
-        author: "Francois",
-        finished?: true,
-        elapsed_seconds: 189,
-        has_results?: true,
-        rows_count: 1,
-        columns: %w(count),
-        id: UUID.generate,
-        results: [%w(24123)],
-        query: "SELECT count(*) FROM ...",
-        query_error: "",
-        query_plan: "")
+      query = Query[query_id: params[:id]]
+      @job = JobForm.new(query: query, state_changes: query.state_changes, results: query.results || QueryResult.new)
 
       erb :job, layout: :layout
     end

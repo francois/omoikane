@@ -8,6 +8,7 @@ gem "sequel"
 
 group :server do
   gem "escape"
+  gem "reform"
   gem "sinatra"
   gem "thin"
   gem "tzinfo"
@@ -21,3 +22,5 @@ end
 group :notifier do
   gem "pusher"
 end
+
+gem "rake", groups: %w(development test)
