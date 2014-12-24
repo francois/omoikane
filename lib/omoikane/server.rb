@@ -163,12 +163,13 @@ module Omoikane
 
     # This route MUST come before /:id, or else Sinatra matches /:id and we fail to return anything
     get "/job/:id.csv" do
-      @job = controller.job_status(params[:id])
-      results_path = controller.job_results_path(params[:id])
+      query = QueryResult[query_id: params[:id]]
+      halt 404 unless query
+
       headers "Content-Encoding" => "gzip"
-      send_file results_path,
+      send_file query.results_path,
         disposition: :attachment,
-        filename: "#{@job.query_id}.csv",
+        filename: "#{query.query_id}.csv",
         type: :csv
     end
 
@@ -185,6 +186,10 @@ module Omoikane
 
     get "/search" do
       erb :search_results, layout: :layout
+    end
+
+    not_found do
+      erb :"404", layout: :layout
     end
 
     helpers do
