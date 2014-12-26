@@ -3,6 +3,7 @@ require "bundler"
 Bundler.require :default, :worker
 
 $LOAD_PATH.unshift File.expand_path("../../lib", __FILE__)
+require "omoikane/jobsdb"
 
 def usage(message)
   STDERR.puts <<-EOF.gsub(/^ {4}/, "")
@@ -13,11 +14,7 @@ def usage(message)
     Where:
 
       JOBSDIR:
-        The name of a directory where jobs are dropped. #{File.basename($0)} will
-        launch new queries as they are created.
-
-      JOBSDB:
-        The path to the SQLite3 database where jobs are stored.
+        The name of a directory where job results will be stored.
   EOF
 
   exit 1
@@ -27,14 +24,8 @@ JOBSDIR = ENV["JOBSDIR"]
 usage("JOBSDIR not passed through the environment; won't continue") unless JOBSDIR
 usage("JOBSDIR is set to #{JOBSDIR.inspect}, but is not a directory; won't continue") unless File.directory?(JOBSDIR)
 
-jobsdb_url = ENV["OMOIKANE_JOBS_DATABASE_URL"]
-usage("OMOIKANE_JOBS_DATABASE_URL not passed through the environment; won't continue") unless jobsdb_url
-
-JOBSDB = jobsdb_url.sub("sqlite://", "")
-usage("JOBSDB is set to #{JOBSDB.inspect}, but is not a file; won't continue") unless File.file?(JOBSDB)
-
 jobrunner_path = File.expand_path("../omoikane-run-query", __FILE__)
 
 require "omoikane/worker"
-worker = Omoikane::Worker.new(JOBSDIR, JOBSDB, jobrunner_path)
+worker = Omoikane::Worker.new(JOBSDIR, jobrunner_path)
 worker.run # never returns

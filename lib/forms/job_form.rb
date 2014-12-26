@@ -1,3 +1,5 @@
+require "csv"
+
 class JobForm < Reform::Form
   include Composition
 
@@ -12,12 +14,17 @@ class JobForm < Reform::Form
   property :columns_count, on: :results
   property :headers,       on: :results
   property :results_path,  on: :results
-  property :plan,          on: :results
-  property :errors,        on: :results
+  property :query_plan,    on: :results
+  property :query_errors,  on: :results
+  property :rows,          on: :results
 
   collection :state_changes, on: :query do
     property :state
     property :updated_at
+  end
+
+  def columns
+    CSV.parse(headers).first
   end
 
   def has_results?

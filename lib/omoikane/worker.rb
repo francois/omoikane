@@ -1,4 +1,5 @@
 require "omoikane/logging"
+require "models/pending_job"
 require "set"
 
 module Omoikane
@@ -7,20 +8,13 @@ module Omoikane
   # The worker is mostly stateless: it remembers jobs it has already seen and
   # processed, but does not remember anything beyond that.
   class Worker
-    def initialize(jobsdir, jobsdb, jobrunner_path)
+    def initialize(jobsdir, jobrunner_path)
       @jobsdir = jobsdir
-      @jobsdb = jobsdb
       @jobrunner_path = jobrunner_path
       @cycle_count = 0
 
       @running = true
       @terminated = Set.new
-
-      # The list of jobs we already know about
-      # In order to not launch any existing queries, mark every existing job as known on start
-      @known = Dir[File.join(JOBSDIR, "*", "query.sql")].
-        map{|query_file| File.dirname(query_file)}.
-        to_set
 
       trap("TERM", &method(:stop_running))
       trap("CHLD", &method(:record_terminated_child))
@@ -28,9 +22,6 @@ module Omoikane
 
     # The path to the directory containing jobs
     attr_reader :jobsdir
-
-    # The path to the SQLite3 database which contains the details of queries
-    attr_reader :jobsdb
 
     # Whether we're running or not
     attr_reader :running
@@ -41,11 +32,6 @@ module Omoikane
     # The number of times we've run our event loop
     attr_reader :cycle_count
 
-    # The set of jobs we know about
-    # This set can grow to very large proportions if the process runs for
-    # very long periods of time.
-    attr_reader :known
-
     # The path to the omoikane-job executable
     attr_reader :jobrunner_path
 
@@ -53,7 +39,7 @@ module Omoikane
     def run
       logger.info "Omoikane worker running!"
       while running do
-        sleep 1
+        sleep 2.1
 
         log_terminated_jobs
         maybe_log_we_are_still_running
@@ -81,16 +67,14 @@ module Omoikane
     end
 
     def find_new_jobs
-      Dir[File.join(JOBSDIR, "*", "query.sql")].
-        map{|query_file| File.dirname(query_file)}.
-        reject{|jobdir| known.include?(jobdir)}
+      PendingJob.pending_query_ids
     end
 
     def launch(newjobs)
-      newjobs.each do |jobdir|
-        self.known << jobdir
-        pid = fork { exec(jobrunner_path, jobdir, jobsdb) }
-        logger.info "Launched #{jobdir.inspect} as #{pid}"
+      newjobs.each do |query_id|
+        pid = fork { exec(jobrunner_path, jobsdir, query_id) }
+
+        logger.info "Launched #{query_id.inspect} as #{pid}"
       end
     end
 

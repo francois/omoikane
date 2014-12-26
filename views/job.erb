@@ -28,7 +28,7 @@
         </tr>
       </thead>
       <tbody>
-        <% job.results.each_with_index do |row, index| %>
+        <% job.rows.each_with_index do |row, index| %>
           <tr style="<%= "display:none" if index > 50 %>">
             <% job.columns.each_with_index do |_, i| %>
               <td><%=h row[i] %></td>
@@ -44,9 +44,9 @@
     </table>
   <% end %>
 
-  <% if job.errors.respond_to?(:empty?) && !job.errors.empty? then %>
+  <% if job.query_errors.respond_to?(:empty?) && !job.query_errors.empty? then %>
     <h2>Errors</h2>
-  <pre><%=h job.errors %></pre>
+    <pre><%=h job.query_errors %></pre>
   <% end %>
 
   <h2>Query</h2>
@@ -58,9 +58,9 @@
   <a href="/" class="button secondary">Back to list</a>
   </p>
 
-  <% if job.plan.respond_to?(:empty?) && !job.plan.empty? then %>
+  <% if job.query_plan.respond_to?(:empty?) && !job.query_plan.empty? then %>
     <h2>Plan</h2>
-    <pre><%=h job.plan %></pre>
+    <pre><%=h job.query_plan %></pre>
   <% end %>
 </div>
 </div>

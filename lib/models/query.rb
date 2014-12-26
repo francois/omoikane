@@ -18,4 +18,47 @@ class Query < Sequel::Model
       order(:updated_at).
       all
   end
+
+  def started!
+    db.transaction do
+      results && results.delete
+      self.results = QueryResult.new(created_at: Time.now.utc)
+      self.results.save
+
+      add_state_change(QueryState.new(updated_at: Time.now.utc, state: "stated"))
+    end
+  end
+
+  def explained!
+    add_state_change(QueryState.new(updated_at: Time.now.utc, state: "explained"))
+  end
+
+  def set_plan!(new_plan)
+    results.update_fields({query_plan: new_plan}, [:query_plan], raise_on_failure: true)
+  end
+
+  def set_error!(new_error)
+    results.update_fields({query_errors: new_error}, [:query_errors], raise_on_failure: true)
+  end
+
+  def set_results!(results_path, rows_count, columns)
+    db.transaction do
+      add_state_change(QueryState.new(updated_at: Time.now.utc, state: "finished"))
+      results.update_fields({
+        results_path:  results_path,
+        rows_count:    rows_count,
+        columns_count: columns.size,
+        headers:       columns.to_csv.chomp},
+        [:results_path, :rows_count, :columns_count, :headers],
+        raise_on_failure: true)
+    end
+  end
+
+  def failed_explain!
+    add_state_change(QueryState.new(updated_at: Time.now.utc, state: "failed_explain"))
+  end
+
+  def failed_run!
+    add_state_change(QueryState.new(updated_at: Time.now.utc, state: "failed_run"))
+  end
 end

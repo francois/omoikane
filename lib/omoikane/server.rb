@@ -3,6 +3,7 @@ require "logger"
 require "sinatra/base"
 
 require "models/query"
+require "models/pending_job"
 require "forms/job_form"
 require "forms/query_form"
 
@@ -157,6 +158,7 @@ module Omoikane
         Query.db.transaction do
           @query.save
           QueryState.create(query_id: query_id, updated_at: Time.now.utc, state: "submitted")
+          PendingJob.create(query_id: query_id)
         end
 
         session[:author] = @query.author
@@ -206,7 +208,7 @@ module Omoikane
         when "running"    ; "fi-loop"
         when "explaining" ; "fi-refresh"
         when "queued"     ; "fi-clock"
-        when /^errored-/  ; "fi-asterisk"
+        when /^failed-/   ; "fi-asterisk"
         else              ; "fi-first-aid"
         end
       end
