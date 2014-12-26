@@ -25,7 +25,7 @@ class Query < Sequel::Model
       self.results = QueryResult.new(created_at: Time.now.utc)
       self.results.save
 
-      add_state_change(QueryState.new(updated_at: Time.now.utc, state: "stated"))
+      add_state_change(QueryState.new(updated_at: Time.now.utc, state: "started"))
     end
   end
 
