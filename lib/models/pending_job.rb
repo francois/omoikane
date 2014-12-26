@@ -8,7 +8,7 @@ class PendingJob < Sequel::Model
 
     db.transaction do
       ids = select_map(:query_id)
-      filter(query_id: ids).delete
+      filter(query_id: ids).delete if ids.any?
     end
 
     ids
