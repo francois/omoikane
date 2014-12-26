@@ -15,7 +15,7 @@ class Query < Sequel::Model
       limit(25)
 
     join(ds, [:query_id]).
-      order(:updated_at).
+      order(Sequel.desc(:updated_at)).
       all
   end
 
