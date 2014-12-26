@@ -4,8 +4,10 @@ require "sinatra/base"
 
 require "models/query"
 require "models/pending_job"
+require "models/project"
 require "forms/job_form"
 require "forms/query_form"
+require "forms/project_form"
 
 module Omoikane
   class Server < Sinatra::Base
@@ -47,11 +49,12 @@ module Omoikane
     #
 
     get "/projects" do
+      @projects = Project.most_recent(25).map{|project| ProjectForm.new(project: project, queries: project.queries)}
       erb :projects, layout: :layout
     end
 
     get "/projects/new" do
-      @project = OpenStruct.new()
+      @project = ProjectForm.new(project: Project.new(author: session[:author]), queries: [])
       erb :edit_project, layout: :layout
     end
 
@@ -71,8 +74,25 @@ module Omoikane
       erb :edit_project, layout: :layout
     end
 
+    post "/projects" do
+      @project = ProjectForm.new(project: Project.new, queries: [])
+      if @project.validate(params[:project]) then
+        @project.save
+        redirect "/project/#{params[:id]}/edit"
+      else
+        erb :edit_project, layout: :layout
+      end
+    end
+
     post "/project/:id" do
-      redirect "/project/#{params[:id]}/edit"
+      project = Project[params[:id]]
+      @project = ProjectForm.new(project: project, queries: project.queries)
+      if @project.validate(params[:project]) then
+        @project.save
+        redirect "/project/#{params[:id]}/edit"
+      else
+        erb :edit_project, layout: :layout
+      end
     end
 
     get "/project/:id/queries/new" do
