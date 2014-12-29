@@ -8,10 +8,12 @@ require "models/project"
 require "forms/job_form"
 require "forms/query_form"
 require "forms/project_form"
+require "forms/project_query_form"
 
 module Omoikane
   class Server < Sinatra::Base
     enable :logging
+    enable :method_override
 
     enable :sessions
     set :session_secret, ENV["SESSION_SECRET"] if ENV["SESSION_SECRET"]
@@ -49,36 +51,26 @@ module Omoikane
     #
 
     get "/projects" do
-      @projects = Project.most_recent(25).map{|project| ProjectForm.new(project: project, queries: project.queries)}
+      @projects = Project.most_recent(25).map{|project| ProjectForm.new(project)}
       erb :projects, layout: :layout
     end
 
     get "/projects/new" do
-      @project = ProjectForm.new(project: Project.new(author: session[:author]), queries: [])
+      @form = ProjectForm.new(Project.new(author: session[:author]))
       erb :edit_project, layout: :layout
     end
 
     get "/project/:id/edit" do
-      @project = OpenStruct.new(
-        id: UUID.generate,
-        title: "Netflix EOM",
-        instructions: "Use this every first Monday of the month, to calculate Netflix's report. Fill in the parameters this way:\n\n* start_on: ...\n* end_on: ...\n",
-        notes: "Internal notes for R&D people, not for people who will submit the project.",
-        author: "pablo",
-        persisted?: true,
-        queries: [
-          OpenStruct.new(title: "participants", sql: "SELECT count(DISTINCT persona_service_id) FROM ... WHERE market_id = 'france' AND daily_start_on BETWEEN :start_on AND :end_on"),
-          OpenStruct.new(title: "interactions", sql: "SELECT count(*) FROM ... WHERE market_id = 'france' AND daily_start_on BETWEEN :start_on AND :end_on"),
-        ]
-      )
+      @form = ProjectForm.new(Project[params[:id]])
       erb :edit_project, layout: :layout
     end
 
     post "/projects" do
-      @project = ProjectForm.new(project: Project.new, queries: [])
-      if @project.validate(params[:project]) then
-        @project.save
-        redirect "/project/#{params[:id]}/edit"
+      @form = ProjectForm.new(Project.new)
+      if @form.validate(params[:project]) then
+        @form.project_id = UUID.generate
+        @form.save
+        redirect "/project/#{@form.project_id}/edit"
       else
         erb :edit_project, layout: :layout
       end
@@ -86,9 +78,9 @@ module Omoikane
 
     post "/project/:id" do
       project = Project[params[:id]]
-      @project = ProjectForm.new(project: project, queries: project.queries)
-      if @project.validate(params[:project]) then
-        @project.save
+      @form = ProjectForm.new(project)
+      if @form.validate(params[:project]) then
+        @form.save
         redirect "/project/#{params[:id]}/edit"
       else
         erb :edit_project, layout: :layout
@@ -96,36 +88,57 @@ module Omoikane
     end
 
     get "/project/:id/queries/new" do
-      @query = OpenStruct.new(
-        persisted?: false,
-        project_title: "Netflix EOM")
+      @form = ProjectQueryForm.new(ProjectQuery.new(project: Project[params[:id]]))
       erb :edit_project_query, layout: :layout
     end
 
     get "/project/:project_id/query/:id/edit" do
-      @query = OpenStruct.new(
-        persisted?: true,
-        project_title: "Netflix EOM",
-        title: "participants",
-        sql: "SELECT\n    weekly_start_on\n  , count(DISTINCT persona_service_id || service_name)\nFROM show_interaction_bindings\nWHERE market_id = 'france'\n  AND daily_start_on BETWEEN :start_on AND :end_on\nGROUP BY weekly_start_on\nORDER BY weekly_start_on\n",
-        notes: "Internal notes for the R&D specialist that works on this query")
+      @form = ProjectQueryForm.new(ProjectQuery[query_id: params[:id]])
       erb :edit_project_query, layout: :layout
     end
 
     post "/project/:project_id/queries" do
-      # create
-      redirect "/project/#{params[:project_id]}/edit"
+      if project = Project[params[:project_id]] then
+        @form = ProjectQueryForm.new(ProjectQuery.new(project: Project[params[:project_id]]))
+        if @form.validate(params[:query]) then
+          @form.query_id = UUID.generate
+          @form.save
+
+          redirect "/project/#{@form.project_id}/edit"
+        else
+          erb :edit_project_query, layout: :layout
+        end
+      else
+        halt :not_found
+      end
     end
 
     post "/project/:project_id/query/:id" do
-      # update
-      redirect "/project/#{params[:project_id]}/edit"
+      if query = ProjectQuery[query_id: params[:id], project_id: params[:project_id]] then
+        @form = ProjectQueryForm.new(query)
+        if @form.validate(params[:query]) then
+          @form.save
+          redirect "/project/#{@form.project_id}/edit"
+        else
+          erb :edit_project_query, layout: :layout
+        end
+      else
+        halt :not_found
+      end
     end
 
     delete "/project/:project_id/query/:id" do
-      # delete
-      redirect "/project/#{params[:project_id]}/edit"
+      if query = ProjectQuery[query_id: params[:id], project_id: params[:project_id]] then
+        query.delete
+        redirect "/project/#{query.project_id}/edit"
+      else
+        halt :not_found
+      end
     end
+
+    #
+    # Runs
+    #
 
     get "/project/:id/runs/new" do
       @run = OpenStruct.new(
@@ -220,7 +233,7 @@ module Omoikane
     end
 
     helpers do
-      attr_reader :job, :project, :query, :run, :jobs
+      attr_reader :job, :project, :query, :run, :jobs, :projects, :form
 
       def job_state_css_class(state)
         case state
@@ -287,6 +300,11 @@ module Omoikane
         else
           "text"
         end
+      end
+
+      def form_errors_if_any(form)
+        return if form && form.errors && form.errors.empty?
+        erb :_form_errors, locals: {form: form}
       end
     end
   end

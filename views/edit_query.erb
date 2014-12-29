@@ -4,19 +4,7 @@
       <h2><%= query.persisted? ? "Edit Query" : "New Query" %></h2>
     </div>
 
-    <% if query.errors.any? then %>
-      <div class="small-12 columns">
-        <div data-alert class="alert-box alert">
-          <h5>Error(s) on this form prevented validation:</h5>
-          <ul>
-            <% query.errors.full_messages.each do |error| %>
-              <li><%= error %></li>
-            <% end %>
-          </ul>
-          <a href="#" class="close">&times;</a>
-        </div>
-      </div>
-    <% end %>
+    <%= form_errors_if_any query %>
 
     <div class="large-8 columns">
       <label for="query_title">Title</label>

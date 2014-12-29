@@ -1,31 +1,33 @@
 <div class="row">
   <div class="small-12 columns">
-    <h1><%= query.persisted? ? "Edit Query" : "New Query" %> in <%= query.project_title %></h1>
+    <h1><%= form.persisted? ? "Edit Query" : "New Query" %> in <%= form.project_title %></h1>
   </div>
 </div>
 
-<form method="post" action="/project/1234/query/1234">
+<form method="post" action="/project/<%= form.project_id %>/<%= form.persisted? ? "query/#{form.query_id}" : "queries" %>">
   <div class="row">
+    <%= form_errors_if_any(form) %>
+
     <div class="small-12 columns">
       <label for="query_title">Title</label>
-      <input type="text" id="query_title" name="query[title]" value="<%=h query.title %>">
+      <input type="text" id="query_title" name="query[title]" value="<%=h form.title %>">
     </div>
 
     <div class="small-12 columns">
       <label for="query_sql">SQL</label>
-      <textarea id="query_sql" name="query[sql]" rows="15"><%=h query.sql %></textarea>
+      <textarea id="query_sql" name="query[sql]" rows="15"><%=h form.sql %></textarea>
     </div>
 
     <div class="small-12 columns">
       <input type="submit" value="Save" class="button primary">
-      <a href="/project/1234/edit" class="button secondary">Cancel</a>
+      <a href="/project/<%= form.project_id %>/edit" class="button secondary">Cancel</a>
     </div>
   </div>
 </form>
-<% if query.persisted? then %>
+<% if form.persisted? then %>
 <div class="row delete">
   <div class="small-12 columns">
-    <form method="post" action="/project/1234/query/123">
+    <form method="post" action="/project/<%= form.project_id %>/query/<%= form.query_id %>">
       <input type="hidden" name="_method" value="delete">
       <input type="submit" value="Delete" class="button alert right">
     </form>
