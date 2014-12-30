@@ -1,3 +1,4 @@
+require "sequel"
 require "omoikane/logging"
 
 jobsdb_url = ENV["OMOIKANE_DATABASE_URL"]

@@ -5,10 +5,14 @@ require "sinatra/base"
 require "models/query"
 require "models/pending_job"
 require "models/project"
+require "models/run"
+require "models/run_query"
 require "forms/job_form"
 require "forms/query_form"
 require "forms/project_form"
 require "forms/project_query_form"
+require "forms/run_form"
+require "forms/run_status_form"
 
 module Omoikane
   class Server < Sinatra::Base
@@ -141,38 +145,48 @@ module Omoikane
     #
 
     get "/project/:id/runs/new" do
-      @run = OpenStruct.new(
-        id: UUID.generate,
-        project_title: "Netflix EOM",
-        project_instructions: "Use this every first Monday of the month, to calculate Netflix's report. Fill in the parameters this way:\n\n* start_on: ...\n* end_on: ...\n",
-        project_notes: "Internal notes for R&D people, not for people who will submit the project.",
-        subtitle: params[:run_id] ? "december 2014" : nil,
-        submitter: params[:run_id] ? "cecile" : nil,
-        persisted?: false,
-        number_of_queries: 2,
-        parameters: %w(start_on end_on start_at end_at category_name))
+      @form = RunForm.new(Run.new(submitter: session[:author], project: Project[params[:id]]))
       erb :new_run, layout: :layout
     end
 
     post "/project/:id/runs" do
-      # post
-      redirect "/run/1234"
+      project = Project[params[:id]]
+      run     = Run.new(project: project)
+      @form   = RunForm.new(run)
+      if @form.validate(params[:run]) then
+        Sequel::Model.db.transaction do
+          @form.save do |validated_params|
+            # The equivalent of ActiveRecord's attr_accessible
+            acceptable_params = @form.build_default_parameters.keys.map(&:to_s)
+
+            run.subtitle     = validated_params.fetch(:subtitle)
+            run.submitter    = validated_params.fetch(:submitter)
+            run.parameters   = Oj.dump(params[:run][:parameters].select{|name, _| acceptable_params.include?(name.to_s)})
+            run.save
+          end
+
+          runparams = Oj.load(run.parameters, symbol_keys: true)
+
+          run.remove_all_queries
+          project.queries.each do |query|
+            job = Query.create(query_id: UUID.generate, title: "#{query.title} (#{project.title} / #{run.subtitle})", author: @form.submitter, sql: TARGETDB[query.sql, runparams].sql)
+            RunQuery.create(run_id: run.run_id, project_id: query.project_id, query_id: query.query_id, job_id: job.query_id)
+            PendingJob.create(query_id: job.query_id)
+          end
+        end
+
+        redirect "/run/#{run.run_id}"
+      else
+        erb :new_run, layout: :layout
+      end
+    end
+
+    get "/runs" do
+      erb :runs, layout: :layout
     end
 
     get "/run/:id" do
-      @run = OpenStruct.new(
-        id: UUID.generate,
-        project_title: "Netflix EOM",
-        project_instructions: "Use this every first Monday of the month, to calculate Netflix's report. Fill in the parameters this way:\n\n* start_on: ...\n* end_on: ...\n",
-        project_notes: "Internal notes for R&D people, not for people who will submit the project.",
-        subtitle: "december 2014",
-        submitter: "cecile",
-        persisted?: true,
-        queries: [
-          OpenStruct.new(submitted_at: "2014-12-23T19:33", current_state: "running", title: "participants", sql: "SELECT count(DISTINCT persona_service_id) FROM ... WHERE market_id = 'france' AND daily_start_on BETWEEN :start_on AND :end_on"),
-          OpenStruct.new(submitted_at: "2014-12-23T19:33", current_state: "running", title: "interactions", sql: "SELECT count(*) FROM ... WHERE market_id = 'france' AND daily_start_on BETWEEN :start_on AND :end_on"),
-        ],
-        parameters: {start_on: "2014-11-09", end_on: "2014-12-27", start_at: "2014-11-01 07:00", end_at: "2014-12-31 08:00", category_name: "sports",})
+      @form = RunStatusForm.new(Run[params[:id]])
       erb :run_status, layout: :layout
     end
 
@@ -237,12 +251,12 @@ module Omoikane
 
       def job_state_css_class(state)
         case state
-        when "finished"   ; "fi-page"
-        when "running"    ; "fi-loop"
-        when "explaining" ; "fi-refresh"
-        when "queued"     ; "fi-clock"
-        when /^failed-/   ; "fi-asterisk"
-        else              ; "fi-first-aid"
+        when "finished"       ; "fi-page"
+        when "running"        ; "fi-loop"
+        when "explaining"     ; "fi-refresh"
+        when /started|queued/ ; "fi-clock"
+        when /^failed-/       ; "fi-asterisk"
+        else                  ; "fi-first-aid"
         end
       end
 
@@ -251,12 +265,12 @@ module Omoikane
       end
 
       def format_timestamp(timestamp)
-        if Time.now.utc < (Date.today - 7).to_time then
-          %Q(<span title="#{ tz.utc_to_local(timestamp).strftime("%Y-%m-%d %H:%M") }">#{ tz.utc_to_local(timestamp).strftime("%b %d, %H:%M") }</span>)
-        elsif Time.now.utc < (Date.today - 1).to_time then
-          %Q(<span title="#{ tz.utc_to_local(timestamp).strftime("%Y-%m-%d %H:%M") }">#{ tz.utc_to_local(timestamp).strftime("%a, %H:%M") }</span>)
+        if timestamp < (Date.today - 7).to_time then
+          %Q(<span class="timestamp" title="#{ tz.utc_to_local(timestamp).strftime("%Y-%m-%d %H:%M") }">#{ tz.utc_to_local(timestamp).strftime("%b %d, %H:%M") }</span>)
+        elsif timestamp < (Date.today - 1).to_time then
+          %Q(<span class="timestamp" title="#{ tz.utc_to_local(timestamp).strftime("%Y-%m-%d %H:%M") }">#{ tz.utc_to_local(timestamp).strftime("%a, %H:%M") }</span>)
         else
-          %Q(<span title="#{ tz.utc_to_local(timestamp).strftime("%Y-%m-%d %H:%M") }">#{ time_ago_in_words(timestamp) }</span>)
+          %Q(<span class="timestamp" title="#{ tz.utc_to_local(timestamp).strftime("%Y-%m-%d %H:%M") }">#{ time_ago_in_words(timestamp) } ago</span>)
         end
       end
 
@@ -284,7 +298,7 @@ module Omoikane
       end
 
       def markdown(text)
-        h(text).gsub("\n", "<br>")
+        Kramdown::Document.new(text).to_html
       end
 
       def pusher_app_key

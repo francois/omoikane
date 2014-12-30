@@ -1,47 +1,49 @@
 <div class="row">
   <div class="small-12 columns">
-    <h1><%=h run.project_title %>: <%=h run.subtitle %>&mdash;Run Status</h1>
+    <h1><%=h form.project_title %>: <%=h form.subtitle %>&mdash;Run Status</h1>
   </div>
 </div>
 <div class="row">
   <div class="small-12 columns">
-    <p>Started <%= time_ago_in_words(Time.now.utc - 3672) %>, by <span class="author"><%=h run.submitter %></span>.</p>
+    <p>Submitted <%= format_timestamp(form.submitted_at) %>, by <span class="author"><%=h form.submitter %></span>.</p>
   </div>
 </div>
 <div class="row">
   <div class="large-8 columns">
     <h2>Queries</h2>
     <ul class="large-block-grid-2">
-      <% run.queries.each_with_index do |query, index| %>
+      <% form.jobs.each_with_index do |query, index| %>
         <li>
         <div class="panel">
           <div class="right">
-            <a href="/job/1234.csv" class="button secondary tiny" title="download"><i class="fi-download"></i></a>
+            <a href="/job/<%= query.query_id %>.csv" class="button secondary tiny" title="download"><i class="fi-download"></i></a>
           </div>
 
           <div>
             <i class="<%= job_state_css_class(query.current_state) %>"></i>
-            <a href="/job/1234"><%=h query.title %></a>
-            <small>(<%=h 1024 %> rows)</small>
+            <a href="/job/<%= query.query_id %>"><%=h query.title %></a>
+            <% if query.rows_count then %>
+              <small>(<%=h query.rows_count %> rows)</small>
+            <% end %>
             <br>
-            <small><%= time_ago_in_words(Time.now.utc - 30 - 73*index) %></small>
+            <small><%= format_timestamp(query.updated_at) %></small>
           </div>
         </div>
         </li>
       <% end %>
     </ul>
-    <p><a class="button success" href="/download/1234"><i class="fi-download"></i> Download all results</a> as a single ZIP file</p>
+    <p><a class="button success" href="/download/<%= form.run_id %>"><i class="fi-download"></i> Download all results</a> as a single ZIP file</p>
   </div>
   <div class="large-4 columns">
     <h2>Parameters</h2>
     <div class="panel">
       <dl>
-        <% run.parameters.each do |key, value| %>
+        <% form.parameters.each do |key, value| %>
           <dt><%=h key %></dt>
           <dd><%=h value %></dd>
         <% end %>
       </dl>
-      <p><a class="button primary tiny" href="/project/1234/runs/new?run_id=1234">Edit</a></p>
+      <p><a class="button primary tiny" href="/project/<%= form.project_id %>/runs/new?run_id=<%= form.run_id %>">New run</a></p>
     </div>
   </div>
 </div>

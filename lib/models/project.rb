@@ -3,6 +3,7 @@ require "models/project_query"
 
 class Project < Sequel::Model
   one_to_many :queries, class: "ProjectQuery", key: :project_id, order: [:project_id, :title]
+  one_to_many :runs,                           key: :project_id, order: [:project_id, :submitted_at]
   unrestrict_primary_key
 
   def self.most_recent(limit=25)
