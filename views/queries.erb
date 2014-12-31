@@ -6,7 +6,7 @@
         <li>
         <div class="panel">
           <div class="right">
-            <span class="job-state" title="<%=h job.current_state %>"><i class="<%= job_state_css_class(job.current_state) %>"></i></span>
+            <%= job_state(job.current_state) %>
           </div>
           <h5><a href="/job/<%= job.query_id %>"><%= job.title %></a></h5>
           <p>

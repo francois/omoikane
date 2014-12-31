@@ -283,6 +283,10 @@ module Omoikane
         "<span class=\"author\">#{h name}</span>"
       end
 
+      def job_state(state)
+        %Q(<span class="job-state" title="#{h state || "unknown"}"><i class="#{job_state_css_class(state)}"></i></span>)
+      end
+
       def job_state_css_class(state)
         case state
         when "finished"       ; "fi-page"

@@ -20,7 +20,8 @@
           </div>
 
           <div>
-            <i class="<%= job_state_css_class(query.current_state) %>"></i>
+            <%= job_state(query.current_state) %>
+
             <a href="/job/<%= query.query_id %>"><%=h query.title %></a>
             <% if query.rows_count then %>
               <small>(<%=h query.rows_count %> rows)</small>

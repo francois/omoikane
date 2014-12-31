@@ -2,7 +2,7 @@
   <div class="small-12 columns">
     <h1><%=h truncate(job.title) %></h1>
     <h6>
-      <span title="<%=h job.current_state %>"><i class="<%= job_state_css_class(job.current_state) %>"></i></span>
+      <%= job_state(job.current_state) %>
       <span class="timestamp"><%=format_timestamp job.updated_at %></span>,
       by <%=author job.author %><% if job.finished? then %>, in <span class="elapsed"><%=format_elapsed job.elapsed_seconds / 60.0 %> minutes</span><% end %>
   </h6>
