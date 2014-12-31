@@ -172,6 +172,7 @@ module Omoikane
           run.remove_all_queries
           project.queries.each do |query|
             job = Query.create(query_id: UUID.generate, title: "#{query.title} (#{project.title} / #{run.subtitle})", author: @form.submitter, sql: TARGETDB[query.sql, runparams].sql)
+            QueryState.create(query_id: job.query_id, state: "queued")
             RunQuery.create(run_id: run.run_id, project_id: query.project_id, query_id: query.query_id, job_id: job.query_id)
             PendingJob.create(query_id: job.query_id)
           end
@@ -235,7 +236,7 @@ module Omoikane
       if @query.validate(params[:query]) then
         Query.db.transaction do
           @query.save
-          QueryState.create(query_id: query_id, updated_at: Time.now.utc, state: "submitted")
+          QueryState.create(query_id: query_id, state: "queued")
           PendingJob.create(query_id: query_id)
         end
 
