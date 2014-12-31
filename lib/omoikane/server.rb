@@ -1,6 +1,7 @@
 require "cgi"
 require "logger"
 require "sinatra/base"
+require "zip/zip"
 
 require "models/query"
 require "models/pending_job"
@@ -182,6 +183,7 @@ module Omoikane
     end
 
     get "/runs" do
+      # TODO: implement list of runs
       erb :runs, layout: :layout
     end
 
@@ -190,8 +192,36 @@ module Omoikane
       erb :run_status, layout: :layout
     end
 
-    get "/download/:id" do
-      # TODO: zip all results into a single file, then stream the resulting file
+    get "/download/:id.:format" do
+      run = Run[params[:id]]
+      halt :not_found unless run
+
+      case params[:format]
+      when "zip"
+        filename = File.join(ENV.fetch("TMPDIR", "/tmp"), "#{UUID.generate}.zip")
+        Zip::ZipFile.open(filename, Zip::ZipFile::CREATE) do |zipfile|
+          run.results.each do |result|
+            slug = result.query.title.downcase.gsub(/\W+/, "-").sub(/^-|-$/, "")
+            zipfile.get_output_stream("#{slug}.#{result.query.query_id}.csv") do |io|
+              # Decompress the data, in order to recompress in Zip format later
+              data = Zlib::GzipReader.open(result.results_path) do |input|
+                input.read
+              end
+
+              io.write(data)
+            end
+          end
+        end
+
+        slug = "#{run.project.title}-#{run.subtitle}".downcase.gsub(/\W+/, "-").sub(/^-|-$/, "")
+        send_file filename,
+          disposition: :attachment,
+          filename: "#{slug}.zip",
+          type: "application/zip"
+      else
+        # TODO: use a better way to say not acceptable
+        halt 406, "Content Not Acceptable"
+      end
     end
 
     #

@@ -11,4 +11,8 @@ class Run < Sequel::Model
     self.submitted_at ||= Time.now.utc
     super
   end
+
+  def results
+    queries.map(&:results)
+  end
 end

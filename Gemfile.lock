@@ -71,6 +71,7 @@ GEM
     uber (0.0.11)
     uuid (2.3.7)
       macaddr (~> 1.0)
+    zip (2.0.2)
 
 PLATFORMS
   ruby
@@ -90,3 +91,4 @@ DEPENDENCIES
   thin
   tzinfo
   uuid
+  zip

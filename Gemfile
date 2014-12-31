@@ -14,6 +14,7 @@ group :server do
   gem "thin"
   gem "tzinfo"
   gem "uuid"
+  gem "zip"
 end
 
 group :worker do
