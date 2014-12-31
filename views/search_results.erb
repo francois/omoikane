@@ -1,31 +1,44 @@
 <div class="row">
   <div class="small-12 columns">
     <h1>Search Results</h1>
-    <ul class="large-block-grid-3">
+    <h2>Searched for: <em><%=h form.query %></em></h2>
+  </div>
+  <div class="large-6 columns">
+    <h3>Queries</h3>
+    <ul class="large-block-grid-2">
+      <% form.queries.each do |query| %>
 
-      <li>
-      <div class="panel">
-        <div class="right">
-          <span class="job-state" title="<%=h "finished" %>"><i class="<%= job_state_css_class("finished") %>"></i></span>
+        <li>
+        <div class="panel">
+          <div class="right">
+            <%= job_state(query.current_state) %>
+          </div>
+          <h5><a href="/job/<%= query.query_id %>"><%=h query.title %></a></h5>
+          <p>
+          <small>
+            <% if query.ran_as_part_of_a_run? then %>
+              <a href="/run/1234"><em>todo: project</em></a> (1/2);
+            <% end %>
+            by <%=author query.author %>, <%=format_timestamp query.updated_at %>
+          </small>
+          </p>
         </div>
-        <h5><a href="/job/1234">NetFlix EOM: participants</a></h5>
-        <p>
-        <small><a href="/run/1234">Netflix EOM: december 2014</a> (1/2);
-          by <span>Cécile</span>, <span>13 minutes ago</span></small>
-        </p>
-      </div>
-      </li>
+        </li>
+      <% end %>
+    </ul>
+  </div>
 
-      <li>
-      <div class="panel">
-        <div class="right">
-          <span class="job-state" title="<%=h "finished" %>"><i class="<%= job_state_css_class("finished") %>"></i></span>
+  <div class="large-6 columns">
+    <h3>Projects</h3>
+    <ul class="large-block-grid-2">
+      <% form.projects.each do |project| %>
+        <li>
+        <div class="panel">
+          <h5><a href="/project/<%= project.project_id %>"><%=h project.title %></a></h5>
+          <p><small>by <%=author project.author %></small></p>
         </div>
-        <h5><a href="/job/1234">Lightspeed CAN</a></h5>
-        <p><small>by <span>François</span>, <span>21 hours ago</span></small></p>
-      </div>
-      </li>
-
+        </li>
+      <% end %>
     </ul>
   </div>
 </div>

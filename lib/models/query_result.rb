@@ -12,4 +12,12 @@ class QueryResult < Sequel::Model
       CSV.new(io).read
     end
   end
+
+  def query_title
+    query.title
+  end
+
+  def query_author
+    query.author
+  end
 end

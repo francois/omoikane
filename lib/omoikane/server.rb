@@ -3,17 +3,18 @@ require "logger"
 require "sinatra/base"
 require "zip/zip"
 
-require "models/query"
-require "models/pending_job"
-require "models/project"
-require "models/run"
-require "models/run_query"
 require "forms/job_form"
-require "forms/query_form"
 require "forms/project_form"
 require "forms/project_query_form"
+require "forms/query_form"
 require "forms/run_form"
 require "forms/run_status_form"
+require "forms/search_form"
+require "models/pending_job"
+require "models/project"
+require "models/query"
+require "models/run"
+require "models/run_query"
 
 module Omoikane
   class Server < Sinatra::Base
@@ -269,6 +270,10 @@ module Omoikane
     #
 
     get "/search" do
+      projects = Project.search(params[:q], 10).map{|project| ProjectForm.new(project)}
+      queries  = Query.search(params[:q], 10).map{|query| JobForm.new(query: query, state_changes: query.state_changes, results: query.results || QueryResult.new)}
+
+      @form = SearchForm.new(OpenStruct.new(query: params[:q], queries: queries, projects: projects))
       erb :search_results, layout: :layout
     end
 

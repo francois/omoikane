@@ -1,3 +1,5 @@
+require "reform"
+
 class ProjectForm < Reform::Form
   property :project_id
   property :title

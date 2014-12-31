@@ -23,4 +23,11 @@ class Project < Sequel::Model
       queries.detect{|q| q.query_id == id}.delete
     end
   end
+
+  def self.search(query, limit=25)
+    grep([:title, :instructions, :notes, :author], ["%#{query}%"], case_insensitive: true).
+      order(:title).
+      limit(limit).
+      all
+  end
 end

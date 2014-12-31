@@ -20,5 +20,8 @@
         </li>
       <% end %>
     </ul>
+    <% if jobs.empty? then %>
+      <p>No jobs! <a href="/queries/new">Create a new one</a>, or <a href="/projects/new">create a project</a>.</p>
+    <% end %>
   </div>
 </div>

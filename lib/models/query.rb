@@ -61,4 +61,17 @@ class Query < Sequel::Model
   def failed_run!
     add_state_change(QueryState.new(updated_at: Time.now.utc, state: "failed_run"))
   end
+
+  def self.search(query, limit=25)
+    ds = QueryState.
+      select(:query_id, Sequel.as(Sequel.function(:max, :updated_at), :updated_at)).
+      group_by(:query_id).
+      order(Sequel.function(:max, :updated_at))
+
+    join(ds, [:query_id]).
+      grep([:title, :author, :sql], ["%#{query}%"], case_insensitive: true).
+      order(Sequel.desc(:updated_at)).
+      limit(limit).
+      all
+  end
 end
