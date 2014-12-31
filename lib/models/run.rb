@@ -18,6 +18,7 @@ class Run < Sequel::Model
 
   def self.most_recent(limit=25)
     order(Sequel.desc(:submitted_at)).
-      limit(limit)
+      limit(limit).
+      all
   end
 end
