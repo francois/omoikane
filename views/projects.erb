@@ -10,7 +10,7 @@
             <small><a href="/project/<%= project.project_id %>/edit"><i class="fi-pencil" title="Edit"></i> Edit</a></small>
           </div>
           <h4><a href="/project/<%= project.project_id %>/runs/new"><%=h project.title %></a></h4>
-          <p><small>by <%= project.author %></small></p>
+          <p><small>by <%=author project.author %></small></p>
         </div>
         </li>
       <% end %>

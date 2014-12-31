@@ -14,7 +14,7 @@
             <% if job.ran_as_part_of_a_run? then %>
               <a href="/run/1234"><em>todo: project</em></a> (1/2);
             <% end %>
-            by <span><%= job.author %></span>, <%= format_timestamp(job.updated_at) %><% if job.finished? then %>,
+            by <%=author job.author %>, <%= format_timestamp(job.updated_at) %><% if job.finished? then %>,
               in <%= time_ago_in_words(Time.now.utc - job.elapsed_seconds) %><% end %></small></p>
         </div>
         </li>

@@ -279,6 +279,10 @@ module Omoikane
     helpers do
       attr_reader :job, :project, :query, :run, :jobs, :projects, :form, :runs
 
+      def author(name)
+        "<span class=\"author\">#{h name}</span>"
+      end
+
       def job_state_css_class(state)
         case state
         when "finished"       ; "fi-page"

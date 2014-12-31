@@ -6,7 +6,7 @@
         <li>
         <div class="panel">
           <h5><a href="/run/<%= run.run_id %>"><%= run.full_title %></a></h5>
-          <p><small>by <span><%= run.submitter %></span>, <%= format_timestamp(run.submitted_at) %></small></p>
+          <p><small>by <%=author run.submitter %>, <%= format_timestamp(run.submitted_at) %></small></p>
         </div>
         </li>
       <% end %>
