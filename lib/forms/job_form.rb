@@ -24,7 +24,7 @@ class JobForm < Reform::Form
   end
 
   def columns
-    CSV.parse(headers).first
+    CSV.parse(headers).first || []
   end
 
   def has_results?
