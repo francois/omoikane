@@ -1,5 +1,15 @@
 <div class="row">
   <div class="small-12 columns">
-    <h1>RUNS</h1>
+    <h1>Runs</h1>
+    <ul class="large-block-grid-3 runs-list">
+      <% runs.each do |run| %>
+        <li>
+        <div class="panel">
+          <h5><a href="/run/<%= run.run_id %>"><%= run.full_title %></a></h5>
+          <p><small>by <span><%= run.submitter %></span>, <%= format_timestamp(run.submitted_at) %></small></p>
+        </div>
+        </li>
+      <% end %>
+    </ul>
   </div>
 </div>

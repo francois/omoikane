@@ -7,6 +7,10 @@ class RunStatusForm < Reform::Form
   property :submitted_at
   property :project_id
 
+  def full_title
+    "#{project_title}: #{subtitle}"
+  end
+
   def jobs
     model.queries.map(&:job).map{|job| JobForm.new(query: job, state_changes: job.state_changes, results: job.results || QueryResult.new)}
   end

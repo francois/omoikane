@@ -183,7 +183,7 @@ module Omoikane
     end
 
     get "/runs" do
-      # TODO: implement list of runs
+      @runs = Run.most_recent(25).map{|run| RunStatusForm.new(run)}
       erb :runs, layout: :layout
     end
 
@@ -277,7 +277,7 @@ module Omoikane
     end
 
     helpers do
-      attr_reader :job, :project, :query, :run, :jobs, :projects, :form
+      attr_reader :job, :project, :query, :run, :jobs, :projects, :form, :runs
 
       def job_state_css_class(state)
         case state
