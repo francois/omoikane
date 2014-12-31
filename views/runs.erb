@@ -11,5 +11,8 @@
         </li>
       <% end %>
     </ul>
+    <% if runs.empty? then %>
+      <p>No runs yet! <a href="/projects/new">Create</a> then <a href="/projects">run</a> a project first.</p>
+    <% end %>
   </div>
 </div>
