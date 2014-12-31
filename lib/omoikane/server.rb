@@ -163,7 +163,7 @@ module Omoikane
 
             run.subtitle     = validated_params.fetch(:subtitle)
             run.submitter    = validated_params.fetch(:submitter)
-            run.parameters   = Oj.dump(params[:run].fetch(:parameters, {}).select{|name, _| acceptable_params.include?(name.to_s)})
+            run.parameters   = Oj.dump(params[:run].fetch("parameters", {}).select{|name, _| acceptable_params.include?(name.to_s)})
             run.save
           end
 
