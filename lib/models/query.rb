@@ -29,12 +29,11 @@ class Query < Sequel::Model
     end
   end
 
-  def explained!
-    add_state_change(QueryState.new(updated_at: Time.now.utc, state: "explained"))
-  end
-
   def set_plan!(new_plan)
-    results.update_fields({query_plan: new_plan}, [:query_plan], raise_on_failure: true)
+    db.transaction do
+      results.update_fields({query_plan: new_plan}, [:query_plan], raise_on_failure: true)
+      add_state_change(QueryState.new(updated_at: Time.now.utc, state: "explained"))
+    end
   end
 
   def set_error!(new_error)

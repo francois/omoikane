@@ -29,9 +29,8 @@ def explain
            exit 1
          end
 
-  logger.info "Explained query #{JOBID}"
   QUERY.set_plan!(plan.join("\n"))
-  QUERY.explained!
+  logger.info "Explained query #{JOBID}"
 end
 
 def run
@@ -51,6 +50,8 @@ def run
     end
   end
 
+  # To prevent errors in the UI, always have some kind of columns
+  columns = [] unless columns
   logger.info "Found #{columns.size} columns in #{rows_count} rows (#{columns.to_csv.chomp})"
   QUERY.set_results!(results_path, rows_count, columns)
 end
