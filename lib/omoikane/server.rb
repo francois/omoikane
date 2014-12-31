@@ -30,7 +30,7 @@ module Omoikane
     end
 
     get "/" do
-      @jobs = Query.most_recent(25).
+      @jobs = Query.most_recent(24).
         map{|query| JobForm.new(query: query, state_changes: query.state_changes, results: query.results || QueryResult.new)}
       erb :queries
     end
@@ -56,7 +56,7 @@ module Omoikane
     #
 
     get "/projects" do
-      @projects = Project.most_recent(25).map{|project| ProjectForm.new(project)}
+      @projects = Project.most_recent(24).map{|project| ProjectForm.new(project)}
       erb :projects, layout: :layout
     end
 
@@ -183,7 +183,7 @@ module Omoikane
     end
 
     get "/runs" do
-      @runs = Run.most_recent(25).map{|run| RunStatusForm.new(run)}
+      @runs = Run.most_recent(24).map{|run| RunStatusForm.new(run)}
       erb :runs, layout: :layout
     end
 
