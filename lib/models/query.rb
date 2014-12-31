@@ -25,24 +25,27 @@ class Query < Sequel::Model
       self.results = QueryResult.new(created_at: Time.now.utc)
       self.results.save
 
-      add_state_change(QueryState.new(updated_at: Time.now.utc, state: "started"))
+      add_state_change(QueryState.new(state: "started"))
     end
   end
 
   def set_plan!(new_plan)
     db.transaction do
       results.update_fields({query_plan: new_plan}, [:query_plan], raise_on_failure: true)
-      add_state_change(QueryState.new(updated_at: Time.now.utc, state: "explained"))
+      add_state_change(QueryState.new(state: "explained"))
     end
   end
 
   def set_error!(new_error)
+    db.transaction do
     results.update_fields({query_errors: new_error}, [:query_errors], raise_on_failure: true)
+      add_state_change(QueryState.new(state: "failed-explain"))
+    end
   end
 
   def set_results!(results_path, rows_count, columns)
     db.transaction do
-      add_state_change(QueryState.new(updated_at: Time.now.utc, state: "finished"))
+      add_state_change(QueryState.new(state: "finished"))
       results.update_fields({
         results_path:  results_path,
         rows_count:    rows_count,
@@ -51,14 +54,6 @@ class Query < Sequel::Model
         [:results_path, :rows_count, :columns_count, :headers],
         raise_on_failure: true)
     end
-  end
-
-  def failed_explain!
-    add_state_change(QueryState.new(updated_at: Time.now.utc, state: "failed_explain"))
-  end
-
-  def failed_run!
-    add_state_change(QueryState.new(updated_at: Time.now.utc, state: "failed_run"))
   end
 
   def self.search(query, limit=25)

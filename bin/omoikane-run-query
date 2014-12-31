@@ -41,11 +41,17 @@ def run
   results_path = File.join(JOBSDIR, "#{JOBID}.csv.gz")
   Zlib::GzipWriter.open(results_path) do |io|
     CSV(io) do |csv|
-      ds = TARGETDB["/* #{JOBID} */ #{QUERY.sql} ;"]
-      ds.each do |row|
-        columns = row.keys unless columns
-        rows_count += 1
-        csv << row.values
+      begin
+        ds = TARGETDB["/* #{JOBID} */ #{QUERY.sql} ;"]
+        ds.each do |row|
+          columns = row.keys unless columns
+          rows_count += 1
+          csv << row.values
+        end
+      rescue Sequel::DatabaseError => e
+        logger.warn "#{e.class}: #{e.message}"
+        QUERY.set_error!(e.message)
+        exit 1
       end
     end
   end
