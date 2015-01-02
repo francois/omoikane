@@ -1,21 +1,35 @@
 # Omoikane
 
 [Omoikane is the God of Knowledge in the Shinto religion](https://en.wikipedia.org/wiki/Omoikane_(Shinto)). The Omoikane
-application is simple Sinatra application designed to run queries against a specific server. All data is browseable
-online, and results can be easily exported as CSV.
+application is a simple Sinatra application designed to run queries against a specific server. All query results are
+browseable online, and results can be easily exported as CSV. There exists the concept of a project, where a project
+is represented as a series of queries, which can be run multiple times as each query can be parameterized.
+
 
 # Installation
 
-Clone the directory somewhere.
+Clone the directory somewhere, edit the Gemfile and add your preferred database library or libraries:
 
-# Configuration
+* `gem "pg"`
+* `gem "sqlite"`
+* `gem "mysql"`
+
+Once you've added one or more libraries, you must bundle, to calculate the correct dependencies:
+
+    $ bundle install
+
+
+## Configuration
+
+Create a `.env` file in the project's root directory, with the correct values for your environment:
 
 * `SESSION_SECRET`: Run `dd if=/dev/random of=- bs=1024 count=1 | sha256sum` and use the results as your secret;
 * `JOBSDIR`: Create a directory in which Omoikane can store all it's application files;
-* `PSQL_PATH`: Set to your local `psql` installation, usually `/usr/bin/psql`;
 * `RUBYOPT`: Set to `-Ilib`.
+* `OMOIKANE_DATABASE_URL`: The [Sequel](http://sequel.jeremyevans.net/) URL of a database where Omoikane will store it's state.
+* `OMOIKANE_TARGET_URL`: The [Sequel](http://sequel.jeremyevans.net/) URL of the database you want to query over Omoikane.
 
-# Notifications
+### Notifications
 
 If you wish to provide push notifications for your users, open a free account at [Pusher](https://pusher.com/). With
 your credentials, create two new environment variables, with the values Pusher will provide you:
@@ -26,6 +40,20 @@ your credentials, create two new environment variables, with the values Pusher w
 Once those variables are available in the environment, direct your users to the home page of Omoikane, where they
 can enable push notifications for themselves. Push notifications are directed to only the person which made the query.
 When John submits a job, Jane won't be notified that the job has completed.
+
+
+# Running
+
+Start Omoikane's web server like this:
+
+    $ bundle exec dotenv thin start -p 5000
+
+And the job runner like this:
+
+    $ bundle exec dotenv bin/omoikane-worker
+
+If you wish, you can start Omoikane from it's development environment using [Vagrant](https://www.vagrantup.com/).
+
 
 # License
 
