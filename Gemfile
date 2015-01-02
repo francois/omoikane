@@ -6,6 +6,10 @@ gem "foreman", group: :development
 gem "oj"
 gem "sequel"
 
+# Database Engine libraries, required by Sequel
+# gem "pg"
+# gem "sqlite3"
+
 group :server do
   gem "escape"
   gem "kramdown"
