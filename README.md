@@ -31,6 +31,8 @@ Create a `.env` file in the project's root directory, with the correct values fo
 
 ### Notifications
 
+__NOTE__: This part is still in flux. In the original version, it worked, but the latest version does not. We're working on this.
+
 If you wish to provide push notifications for your users, open a free account at [Pusher](https://pusher.com/). With
 your credentials, create two new environment variables, with the values Pusher will provide you:
 
