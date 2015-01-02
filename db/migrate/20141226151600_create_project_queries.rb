@@ -6,7 +6,7 @@ Sequel.migration do
       column :title, :text, null: false
       column :sql, :text, null: false
 
-      primary_key [:project_id, :title]
+      primary_key [:query_id]
       foreign_key [:project_id], :projects
     end
   end
