@@ -46,15 +46,13 @@ When John submits a job, Jane won't be notified that the job has completed.
 
 # Running
 
-Start Omoikane's web server like this:
+Start Omoikane's services using [Foreman](https://github.com/ddollar/foreman):
 
-    $ bundle exec dotenv thin start -p 5000
+    $ bundle exec foreman start
 
-And the job runner like this:
+This will launch two services: the web process as well as a worker process, which runs the actual queries.
 
-    $ bundle exec dotenv bin/omoikane-worker
-
-If you wish, you can start Omoikane from it's development environment using [Vagrant](https://www.vagrantup.com/).
+You may wish to run Omoikane from [Vagrant](https://www.vagrantup.com/).
 
 
 # License
