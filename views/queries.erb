@@ -1,0 +1,27 @@
+<div class="row">
+  <div class="small-12 columns">
+    <h1>Recent Jobs</h1>
+    <ul class="large-block-grid-3 jobs-list">
+      <% jobs.each do |job| %>
+        <li>
+        <div class="panel">
+          <div class="right">
+            <%= job_state(job.current_state) %>
+          </div>
+          <h5><a href="/job/<%= job.query_id %>"><%= job.title %></a></h5>
+          <p>
+          <small>
+            <% if job.ran_as_part_of_a_run? then %>
+              <a href="/run/1234"><em>todo: project</em></a> (1/2);
+            <% end %>
+            by <%=author job.author %>, <%= format_timestamp(job.updated_at) %><% if job.finished? then %>,
+              in <%= time_ago_in_words(Time.now.utc - job.elapsed_seconds) %><% end %></small></p>
+        </div>
+        </li>
+      <% end %>
+    </ul>
+    <% if jobs.empty? then %>
+      <p>No jobs! <a href="/queries/new">Create a new one</a>, or <a href="/projects/new">create a project</a>.</p>
+    <% end %>
+  </div>
+</div>

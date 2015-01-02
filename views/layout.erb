@@ -27,49 +27,28 @@
     </ul>
 
     <section class="top-bar-section">
+    <ul class="right">
+      <li class="has-form right">
+      <form method="get" action="/search">
+        <div class="row collapse">
+          <div class="small-12 columns">
+            <input type="search" name="q" placeholder="Search">
+          </div>
+        </div>
+      </form>
+      </li>
+    </ul>
     <ul class="left">
       <li><a href="/queries/new">New Query</a></li>
+      <li><a href="/runs">Runs</a></li>
+      <li><a href="/projects">Projects</a></li>
+      <li><a href="/projects/new">New Project</a></li>
     </ul>
     </section>
     </nav>
   </div>
 
-  <div class="row">
-    <div class="large-3 columns">
-      <table class="table jobs">
-        <thead>
-          <tr>
-            <th>
-              Recent Queries
-            </th>
-          </tr>
-        </thead>
-
-        <tbody>
-          <% vm.jobs.each do |job| %>
-            <tr id="<%=h job.id %>">
-              <td>
-                <span title="<%=h job.current_state %>"><i class="<%= job_state_css_class(job.current_state) %>"></i></span>
-
-                <p><a href="/query/<%=h job.id %>"><%=h truncate(job.title) %></a></p>
-
-                <p>
-                <small>
-                  <span class="timestamp"><%= format_timestamp job.updated_at %></span>, by <span class="author"><%=h job.author %></span>
-                </small>
-                </p>
-
-              </td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="large-9 columns">
-      <%= yield %>
-    </div>
-  </div>
+  <%= yield %>
 
   <script src="/js/jquery-2.1.1.min.js"></script>
   <script src="/js/moment.min.js"></script>

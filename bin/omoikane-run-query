@@ -1,91 +1,69 @@
-#!/bin/bash
-JOBDIR=${1?Missing JOBDIR as 1st argument}
-if [[ ! -d ${JOBDIR} ]] ; then exit 10 ; fi
+#!/usr/bin/env ruby
+require "bundler"
+Bundler.require :default, :worker
 
-PSQL_PATH=/usr/bin/psql
-if [[ ! -x ${PSQL_PATH} ]] ; then exit 11 ; fi
+require "csv"
+require "zlib"
 
-# An input file: the query we will be running
-QUERY_FILE_PATH=${JOBDIR}/query.sql
-if [[ ! -f ${QUERY_FILE_PATH} ]] ; then exit 12 ; fi
+$LOAD_PATH.unshift File.expand_path("../../lib", __FILE__)
+require "omoikane/jobsdb"
+require "omoikane/targetdb"
+require "models/query"
 
-exec 1>${JOBDIR}/job.log 2>&1
+JOBSDIR = ARGV.shift or raise("Missing JOBSDIR as 1st argument")
+raise "#{JOBSDIR.inspect} is not a directory: can't continue" unless File.directory?(JOBSDIR)
 
-JOBID=$( /usr/bin/basename ${JOBDIR} )
-STATE_FILE_PATH=${JOBDIR}/state-changes.csv
+JOBID = ARGV.shift or raise("Missing JOBID as 2nd argument")
 
-EXPLAIN_QUERY_PATH=${JOBDIR}/explain-query.sql
-EXPLAIN_STDOUT_PATH=${JOBDIR}/explain-query-stdout.txt
-EXPLAIN_STDERR_PATH=${JOBDIR}/explain-query-stderr.txt
-/bin/rm --force ${EXPLAIN_STDOUT_PATH} ${EXPLAIN_STDERR_PATH}
+QUERY = Query[JOBID]
+QUERY.started!
 
-RUN_QUERY_PATH=${JOBDIR}/run-query.sql
-RUN_STDOUT_PATH=${JOBDIR}/results.csv
-RUN_STDERR_PATH=${JOBDIR}/run-query-stderr.txt
-ROWS_COUNT_PATH=${JOBDIR}/rows-count.csv
-/bin/rm --force ${RUN_STDOUT_PATH} ${RUN_STDERR_PATH} ${ROWS_COUNT_PATH}
+def explain
+  logger.info "Explaining query #{JOBID}"
+  plan = begin
+           ds = TARGETDB["EXPLAIN /* #{JOBID} */ #{QUERY.sql} ;"]
+           ds.select_map(:"QUERY PLAN")
+         rescue Sequel::DatabaseError => e
+           logger.warn "#{e.class}: #{e.message}"
+           QUERY.set_error!(e.message)
+           exit 1
+         end
 
-function push_client_notification {
-  if [[ ! -z ${NOTIFICATION_PUSHER_URL} ]]
-  then
-    exec bin/push-client-notification ${JOBDIR}
-  else
-    /bin/echo "Push notifications disabled because the NOTIFICATION_PUSHER_URL environment variable is empty"
-  fi
-}
+  QUERY.set_plan!(plan.join("\n"))
+  logger.info "Explained query #{JOBID}"
+end
 
-function record_state_change {
-  local new_state
-  new_state=${1?Missing new_state for "record_state_change" function}
+def run
+  logger.info "Running query #{JOBID}"
 
-  # log state change
-  /bin/echo "record_state_change: ${new_state}"
+  columns = nil
+  rows_count = 0
+  results_path = File.join(JOBSDIR, "#{JOBID}.csv.gz")
+  Zlib::GzipWriter.open(results_path) do |io|
+    CSV(io) do |csv|
+      begin
+        ds = TARGETDB["/* #{JOBID} */ #{QUERY.sql} ;"]
+        ds.each do |row|
+          columns = row.keys unless columns
+          rows_count += 1
+          csv << row.values
+        end
+      rescue Sequel::DatabaseError => e
+        logger.warn "#{e.class}: #{e.message}"
+        QUERY.set_error!(e.message)
+        exit 1
+      end
+    end
+  end
 
-  # record state change
-  /bin/echo $( /bin/date +"%Y-%m-%dT%H:%M:%S.%N%z" ),${new_state} >> ${STATE_FILE_PATH}
-}
+  # To prevent errors in the UI, always have some kind of columns
+  columns = [] unless columns
+  logger.info "Found #{columns.size} columns in #{rows_count} rows (#{columns.to_csv.chomp})"
+  QUERY.set_results!(results_path, rows_count, columns)
+end
 
-function explain_query {
-  /bin/echo "EXPLAIN"           > ${EXPLAIN_QUERY_PATH}
-  /bin/echo "/* ${JOBDIR} */"  >> ${EXPLAIN_QUERY_PATH}
-  /bin/cat ${QUERY_FILE_PATH}  >> ${EXPLAIN_QUERY_PATH}
+explain
+run
 
-  record_state_change "explaining"
-
-  ${PSQL_PATH} --no-psqlrc --file=${EXPLAIN_QUERY_PATH} > ${EXPLAIN_STDOUT_PATH} 2> ${EXPLAIN_STDERR_PATH}
-  if [[ $? -gt 0 ]]
-  then
-    record_state_change "errored-explain"
-    push_client_notification
-    exit 1
-  fi
-}
-
-function run_query {
-  /bin/echo "\set ON_ERROR_STOP on"                                      > ${RUN_QUERY_PATH}
-  /bin/echo "/* ${JOBID} */"                                            >> ${RUN_QUERY_PATH}
-  /bin/echo "COPY ("                                                    >> ${RUN_QUERY_PATH}
-  /bin/cat ${QUERY_FILE_PATH}                                           >> ${RUN_QUERY_PATH}
-  /bin/echo ") TO stdout WITH (FORMAT csv, HEADER true, DELIMITER ',')" >> ${RUN_QUERY_PATH}
-
-  record_state_change "running"
-
-  ${PSQL_PATH} --no-psqlrc --set="ON_ERROR_STOP=on" --file=${RUN_QUERY_PATH} 2> ${RUN_STDERR_PATH} | /bin/gzip > ${RUN_STDOUT_PATH}.gz
-  if [[ $? -gt 0 ]]
-  then
-    record_state_change "errored-running"
-    push_client_notification
-    exit 1
-  fi
-}
-
-function count_result_rows {
-  record_state_change "counting"
-  /bin/zcat ${RUN_STDOUT_PATH} | /usr/bin/wc --lines | /usr/bin/awk '{ print $1 }' > ${ROWS_COUNT_PATH}
-}
-
-explain_query
-run_query
-count_result_rows
-record_state_change "finished"
-push_client_notification
+# Success!
+exit 0

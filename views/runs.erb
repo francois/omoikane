@@ -1,0 +1,18 @@
+<div class="row">
+  <div class="small-12 columns">
+    <h1>Runs</h1>
+    <ul class="large-block-grid-3 runs-list">
+      <% runs.each do |run| %>
+        <li>
+        <div class="panel">
+          <h5><a href="/run/<%= run.run_id %>"><%= run.full_title %></a></h5>
+          <p><small>by <%=author run.submitter %>, <%= format_timestamp(run.submitted_at) %></small></p>
+        </div>
+        </li>
+      <% end %>
+    </ul>
+    <% if runs.empty? then %>
+      <p>No runs yet! <a href="/projects/new">Create</a> then <a href="/projects">run</a> a project first.</p>
+    <% end %>
+  </div>
+</div>

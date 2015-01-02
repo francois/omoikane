@@ -19,21 +19,11 @@ package{[
   'libpq-dev',
   'libpq5',
   'git',
-  'daemontools',
-  'rabbitmq-server',
-  'erlang',
   'build-essential',
   'htop',
   'ntp',
 ]:
   ensure => latest,
-}
-
-package{[
-  'node',
-  'nodejs',
-]:
-  ensure => absent,
 }
 
 exec{'/usr/local/bin/ruby -S gem install --no-rdoc --no-ri bundler':
@@ -45,7 +35,7 @@ file{'/usr/local/bin/edb':
   ensure  => file,
   mode    => 0775,
   content => '#!/bin/sh
-exec /usr/bin/envdir .env /usr/local/bin/bundle exec "${@}"',
+exec /usr/local/bin/bundle exec dotenv "${@}"',
 }
 
 file{'/etc/apt/sources.list.d/pgdg.list':
@@ -54,26 +44,9 @@ file{'/etc/apt/sources.list.d/pgdg.list':
 ',
 }
 
-file{'/etc/apt/sources.list.d/rabbitmq.list':
-  ensure  => file,
-  content => 'deb http://www.rabbitmq.com/debian/ testing main
-',
-}
-
-
-file{'/etc/apt/sources.list.d/erlang-solutions.list':
-  ensure  => file,
-  content => 'deb http://packages.erlang-solutions.com/debian wheezy contrib
-',
-}
-
 exec{'/usr/bin/wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | /usr/bin/apt-key add -':}
-exec{'/usr/bin/wget --quiet -O - http://www.rabbitmq.com/rabbitmq-signing-key-public.asc | /usr/bin/apt-key add -':}
-exec{'/usr/bin/wget --quiet -O - http://packages.erlang-solutions.com/debian/erlang_solutions.asc | /usr/bin/apt-key add -':}
 
 File['/etc/apt/sources.list.d/pgdg.list'] -> Exec['/usr/bin/wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | /usr/bin/apt-key add -'] -> Exec['/usr/bin/apt-get update']
-File['/etc/apt/sources.list.d/rabbitmq.list'] -> Exec['/usr/bin/wget --quiet -O - http://www.rabbitmq.com/rabbitmq-signing-key-public.asc | /usr/bin/apt-key add -'] -> Exec['/usr/bin/apt-get update']
-File['/etc/apt/sources.list.d/erlang-solutions.list'] -> Exec['/usr/bin/wget --quiet -O - http://packages.erlang-solutions.com/debian/erlang_solutions.asc | /usr/bin/apt-key add -'] -> Exec['/usr/bin/apt-get update']
 
 $ruby_version = '2.1.3'
 exec{'download-ruby':
@@ -94,41 +67,4 @@ exec{'install-ruby':
   creates => '/usr/local/bin/ruby',
   require => Package['build-essential'],
   timeout => 0, # disregard timeout
-}
-
-$node_version = 'v0.10.33'
-exec{'download-node':
-  command => "/usr/bin/wget --quiet -O /usr/local/src/node-${node_version}-linux-x64.tar.gz http://nodejs.org/dist/${node_version}/node-${node_version}-linux-x64.tar.gz",
-  creates => "/usr/local/src/node-${node_version}-linux-x64.tar.gz",
-}
-
-exec{'extract-node':
-  command => "/bin/tar --extract --gunzip --file node-${node_version}-linux-x64.tar.gz --directory /usr/local",
-  cwd     => '/usr/local/src',
-  creates => "/usr/local/node-${node_version}-linux-x64/bin/node",
-  require => Exec['download-node'],
-}
-
-file{'/usr/local/node':
-  ensure  => link,
-  target  => "/usr/local/node-${node_version}-linux-x64",
-  require => Exec['extract-node'],
-}
-
-exec{'install ember-cli':
-  command => '/usr/local/node/bin/npm install -g ember-cli',
-  creates => '/usr/local/node/lib/node_modules/ember-cli',
-  require => File['/usr/local/node'],
-}
-
-exec{'install bower':
-  command => '/usr/local/node/bin/npm install -g bower',
-  creates => '/usr/local/node/lib/node_modules/bower',
-  require => File['/usr/local/node'],
-}
-
-exec{'install phantomjs':
-  command => '/usr/local/node/bin/npm install -g phantomjs',
-  creates => '/usr/local/node/lib/node_modules/phantomjs',
-  require => File['/usr/local/node'],
 }

@@ -1,0 +1,22 @@
+<div class="row">
+  <div class="small-12 columns">
+    <h1>Projects List</h1>
+
+    <ul class="large-block-grid-3 projects-list">
+      <% projects.each do |project| %>
+        <li>
+        <div class="panel">
+          <div class="right">
+            <small><a href="/project/<%= project.project_id %>/edit"><i class="fi-pencil" title="Edit"></i> Edit</a></small>
+          </div>
+          <h5><a href="/project/<%= project.project_id %>/runs/new"><%=h project.title %></a></h5>
+          <p><small>by <%=author project.author %></small></p>
+        </div>
+        </li>
+      <% end %>
+    </ul>
+    <% if projects.empty? then %>
+      <p>No projects yet! <a href="/projects/new">Create a new project</a> now.</p>
+    <% end %>
+  </div>
+</div>

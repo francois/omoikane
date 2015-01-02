@@ -1,0 +1,53 @@
+<form method="post" action="/project<%= form.persisted? ? "/#{form.project_id}" : "s" %>">
+  <div class="row">
+    <div class="small-12 columns">
+      <h1><%= form.persisted? ? "Edit Project" : "New Project" %></h1>
+    </div>
+  </div>
+
+  <div class="row">
+    <%= form_errors_if_any form %>
+    <div class="large-8 columns">
+      <div class="row">
+        <div class="small-12 columns">
+          <h4>Project</h4>
+        </div>
+        <div class="large-8 columns">
+          <label for="project_title">Title</label>
+          <input type="text" id="project_title" name="project[title]" value="<%=h form.title %>">
+        </div>
+        <div class="large-4 columns">
+          <label for="project_author">Author</label>
+          <input type="text" id="project_author" name="project[author]" value="<%=h form.author %>">
+        </div>
+        <div class="small-12 columns">
+          <label for="project_instructions">End-user Instructions (Markdown enabled)</label>
+          <textarea type="text" id="project_instructions" name="project[instructions]" rows="12"><%=h form.instructions %></textarea>
+        </div>
+        <div class="small-12 columns">
+          <label for="project_notes">Internal Notes</label>
+          <textarea type="text" id="project_notes" name="project[notes]" rows="8"><%=h form.notes %></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="large-4 columns">
+      <h4>Queries</h4>
+      <% if form.persisted? then %>
+        <ol>
+          <% form.queries.each do |query| %>
+            <li><a href="/project/<%= form.project_id %>/query/<%= query.query_id %>/edit"><%=h query.title %></a></li>
+          <% end %>
+        </ol>
+        <a href="/project/<%= form.project_id %>/queries/new" class="button tiny secondary"><i class="fi-plus"></i> Add Query</a>
+      <% else %>
+        <p><em>Save the project then you can add queries.</em></p>
+      <% end %>
+    </div>
+  </div>
+  <div class="row">
+    <div class="small-12 columns">
+      <input type="submit" value="Save" class="button primary">
+      <a href="/projects">Back to list</a>
+    </div>
+  </div>
+</form>
