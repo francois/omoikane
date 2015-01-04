@@ -8,7 +8,7 @@ gem "oj"
 gem "sequel"
 
 # Database Engine libraries, required by Sequel
-# By default, we consider Postgres to be your go-to choise
+# By default, we consider Postgres to be your go-to choice
 gem "pg"
 gem "sequel_pg", require: false # Recommended by Sequel
 
