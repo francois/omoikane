@@ -26,6 +26,9 @@
         </li>
       <% end %>
     </ul>
+    <% if form.queries.size == 10 then %>
+      <p><em>Only the most recent 10 results are shown.</em></p>
+    <% end %>
   </div>
 
   <div class="large-6 columns">
