@@ -1,0 +1,67 @@
+#!/usr/bin/env ruby
+require "omoikane/jobsdb"
+
+require "csv"
+require "fileutils"
+require "models/query"
+require "models/query_result"
+require "models/query_state"
+require "oj"
+
+# This script converts the old Omoikane file and directory format to the new database format.
+# Run this script with the path to a JOBSDIR and it will import data into the database.
+
+JOBSDIR = ENV.fetch("JOBSDIR")
+
+ARGV.each do |dir|
+  Dir[File.join(dir, "*")].each do |jobdir|
+    next unless File.file?(File.join(jobdir, "results.csv.gz"))
+
+    # details.json
+    # explain-query-stderr.txt
+    # explain-query-stdout.txt
+    # explain-query.sql
+    # job.log
+    # query.sql
+    # results.csv.gz
+    # rows-count.csv
+    # run-query-stderr.txt
+    # run-query.sql
+    # state-changes.csv
+
+    id            = File.basename(jobdir)
+    sql           = File.read(File.join(jobdir, "query.sql"))
+    details       = Oj.load(File.read(File.join(jobdir, "details.json")))
+    state_changes = CSV.read(File.join(jobdir, "state-changes.csv"))
+    results_path  = File.join(JOBSDIR, "#{id}.csv.gz")
+    plan          = File.read(File.join(jobdir, "explain-query-stdout.txt"))
+    errors        = File.read(File.join(jobdir, "explain-query-stderr.txt")) << File.read(File.join(jobdir, "run-query-stderr.txt"))
+
+    FileUtils.cp(File.join(jobdir, "results.csv.gz"), results_path)
+    results = Zlib::GzipReader.open(results_path) do |io|
+      CSV.new(io).read
+    end
+
+    Query.db.transaction do
+      Query.create(
+        query_id: id,
+        title: details.fetch(:title, "unspecified") || "unspecified",
+        author: details.fetch(:author, "unspecified") || "unspecified",
+        sql: sql)
+
+      state_changes.each do |row|
+        QueryState.create(query_id: id, state: row[1], updated_at: row[0])
+      end
+
+      QueryResult.create(
+        query_id: id,
+        results_path: results_path,
+        rows_count: CSV.read(File.join(jobdir, "rows-count.csv")).first.first,
+        columns_count: results.empty? ? 0 : results.first.size,
+        headers: results.empty? ? "" : results.first.to_csv,
+        query_plan: plan,
+        query_errors: errors,
+        created_at: state_changes.last[0])
+    end
+  end
+end
