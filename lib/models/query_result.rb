@@ -5,6 +5,7 @@ require "zlib"
 
 class QueryResult < Sequel::Model
   one_to_one :query, key: :query_id
+  unrestrict_primary_key
 
   def rows
     return [] unless results_path && File.file?(results_path)
