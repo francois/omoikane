@@ -47,7 +47,10 @@ module Omoikane
     end
 
     get "/query/:id/edit" do
-      @query = QueryForm.new(Query[query_id: params[:id]])
+      query = Query[query_id: params[:id]]
+      halt :not_found unless query
+
+      @query = QueryForm.new(query)
       @query.author = session[:author]
       erb :edit_query, layout: :layout
     end
@@ -67,7 +70,10 @@ module Omoikane
     end
 
     get "/project/:id/edit" do
-      @form = ProjectForm.new(Project[params[:id]])
+      project = Project[params[:id]]
+      halt :not_found unless project
+
+      @form = ProjectForm.new(project)
       erb :edit_project, layout: :layout
     end
 
@@ -84,6 +90,8 @@ module Omoikane
 
     post "/project/:id" do
       project = Project[params[:id]]
+      halt :not_found unless project
+
       @form = ProjectForm.new(project)
       if @form.validate(params[:project]) then
         @form.save
@@ -94,28 +102,33 @@ module Omoikane
     end
 
     get "/project/:id/queries/new" do
-      @form = ProjectQueryForm.new(ProjectQuery.new(project: Project[params[:id]]))
+      project = Project[params[:id]]
+      halt :not_found unless project
+
+      @form = ProjectQueryForm.new(ProjectQuery.new(project: project))
       erb :edit_project_query, layout: :layout
     end
 
     get "/project/:project_id/query/:id/edit" do
-      @form = ProjectQueryForm.new(ProjectQuery[query_id: params[:id]])
+      project_query = ProjectQuery[query_id: params[:id]]
+      halt :not_found unless project_query
+
+      @form = ProjectQueryForm.new(project_query)
       erb :edit_project_query, layout: :layout
     end
 
     post "/project/:project_id/queries" do
-      if project = Project[params[:project_id]] then
-        @form = ProjectQueryForm.new(ProjectQuery.new(project: Project[params[:project_id]]))
-        if @form.validate(params[:query]) then
-          @form.query_id = UUID.generate
-          @form.save
+      project = Project[params[:project_id]]
+      halt :not_found unless project
 
-          redirect "/project/#{@form.project_id}/edit"
-        else
-          erb :edit_project_query, layout: :layout
-        end
+      @form = ProjectQueryForm.new(ProjectQuery.new(project: Project[params[:project_id]]))
+      if @form.validate(params[:query]) then
+        @form.query_id = UUID.generate
+        @form.save
+
+        redirect "/project/#{@form.project_id}/edit"
       else
-        halt :not_found
+        erb :edit_project_query, layout: :layout
       end
     end
 
@@ -190,7 +203,10 @@ module Omoikane
     end
 
     get "/run/:id" do
-      @form = RunStatusForm.new(Run[params[:id]])
+      run = Run[params[:id]]
+      halt :not_found unless run
+
+      @form = RunStatusForm.new(run)
       erb :run_status, layout: :layout
     end
 
@@ -261,8 +277,9 @@ module Omoikane
 
     get "/job/:id" do
       query = Query[query_id: params[:id]]
-      @job = JobForm.new(query: query, state_changes: query.state_changes, results: query.results || QueryResult.new)
+      halt :not_found unless query
 
+      @job = JobForm.new(query: query, state_changes: query.state_changes, results: query.results || QueryResult.new)
       erb :job, layout: :layout
     end
 
