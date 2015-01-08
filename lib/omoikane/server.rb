@@ -383,14 +383,14 @@ module Omoikane
         erb :_form_errors, locals: {form: form}
       end
 
-      UUID    = /^[\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12}$/i
-      NUMERIC = /^\d/
+      UUID_RE    = /^[\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12}$/i
+      NUMERIC_RE = /^\d/
 
       def convert_value(value)
         case value
-        when UUID
+        when UUID_RE
           h value
-        when NUMERIC
+        when NUMERIC_RE
           number = BigDecimal.new(value).to_s("F")
           parts = number.split('.')
           parts[0].gsub!(/(\d)(?=(\d\d\d)+(?!\d))/, "\\1&nbsp;")
