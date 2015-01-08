@@ -2,6 +2,7 @@ require "cgi"
 require "logger"
 require "sinatra/base"
 require "zip/zip"
+require "bigdecimal"
 
 require "forms/job_form"
 require "forms/project_form"
@@ -380,6 +381,23 @@ module Omoikane
       def form_errors_if_any(form)
         return if form && form.errors && form.errors.empty?
         erb :_form_errors, locals: {form: form}
+      end
+
+      UUID    = /^[\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12}$/i
+      NUMERIC = /^\d/
+
+      def convert_value(value)
+        case value
+        when UUID
+          h value
+        when NUMERIC
+          number = BigDecimal.new(value).to_s("F")
+          parts = number.split('.')
+          parts[0].gsub!(/(\d)(?=(\d\d\d)+(?!\d))/, "\\1&nbsp;")
+          parts.join(".")
+        else
+          h value
+        end
       end
     end
   end

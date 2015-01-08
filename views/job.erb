@@ -31,7 +31,7 @@
         <% job.rows.each_with_index do |row, index| %>
           <tr style="<%= "display:none" if index > 50 %>">
             <% job.columns.each_with_index do |_, i| %>
-              <td><%=h row[i] %></td>
+              <td><%=convert_value row[i] %></td>
             <% end %>
           </tr>
         <% end %>
