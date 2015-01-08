@@ -11,8 +11,8 @@ class Query < Sequel::Model
     ds = QueryState.
       select(:query_id, Sequel.as(Sequel.function(:max, :updated_at), :updated_at)).
       group_by(:query_id).
-      order(Sequel.function(:max, :updated_at)).
-      limit(25)
+      order(Sequel.desc(Sequel.function(:max, :updated_at))).
+      limit(limit)
 
     join(ds, [:query_id]).
       order(Sequel.desc(:updated_at)).
