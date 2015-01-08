@@ -36,7 +36,7 @@ class RunForm < Reform::Form
 
   def build_default_parameters
     names = queries.map(&:sql).map do |sql|
-      sql.scan(/[^:]:\w+\b/).map{|str| str[1..-1]}
+      sql.scan(/[^:]:\w+\b/).map{|str| str.sub(/^.:+/, "")}
     end.flatten.uniq.sort_by do |key|
       num = 100
       num += 10 if key =~ /_on$/
