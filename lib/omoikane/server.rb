@@ -386,12 +386,16 @@ module Omoikane
         erb :_form_errors, locals: {form: form}
       end
 
-      UUID_RE    = /^[\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12}$/i
-      NUMERIC_RE = /^\d/
+      UUID_RE      = /^[\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12}$/i
+      NUMERIC_RE   = /^\d/
+      TIMESTAMP_RE = /^\d{4}(.)\d{2}\1\d{2}/
 
       def convert_value(value)
         case value
         when UUID_RE
+          h value
+        when TIMESTAMP_RE
+          # TODO: Add an opportunity for converting to person's local time
           h value
         when NUMERIC_RE
           number = BigDecimal.new(value).to_s("F")
