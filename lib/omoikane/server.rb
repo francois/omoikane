@@ -401,7 +401,7 @@ module Omoikane
           number = BigDecimal.new(value).to_s("F")
           parts = number.split('.')
           parts[0].gsub!(/(\d)(?=(\d\d\d)+(?!\d))/, "\\1&nbsp;")
-          parts.join(".")
+          parts.join(".").sub(/[.]0$/, "")
         else
           h value
         end
