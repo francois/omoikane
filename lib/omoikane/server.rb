@@ -387,7 +387,7 @@ module Omoikane
       end
 
       UUID_RE      = /^[\da-f]{8}-([\da-f]{4}-){3}[\da-f]{12}$/i
-      NUMERIC_RE   = /^\d/
+      NUMERIC_RE   = /^[-+]?[0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?$/
       TIMESTAMP_RE = /^\d{4}(.)\d{2}\1\d{2}/
 
       def convert_value(value)
