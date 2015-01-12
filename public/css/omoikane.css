@@ -17,3 +17,7 @@ textarea {
 .delete .button.alert {
   top: -90px;
 }
+
+.numeric {
+  float: right;
+}

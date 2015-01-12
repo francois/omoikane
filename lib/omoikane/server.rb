@@ -401,7 +401,10 @@ module Omoikane
           number = BigDecimal.new(value).to_s("F")
           parts = number.split('.')
           parts[0].gsub!(/(\d)(?=(\d\d\d)+(?!\d))/, "\\1&nbsp;")
-          parts.join(".").sub(/[.]0$/, "")
+
+          # The nbsp below is there to prevent the column from not having any text in it
+          # By floating the content, the cell shrinks
+          "<span class=\"numeric\">#{ parts.join(".").sub(/[.]0$/, "") }</span>&nbsp;"
         else
           h value
         end
