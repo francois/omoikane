@@ -23,7 +23,7 @@ Once you've added one or more libraries, you must bundle, to calculate the corre
 
 Create a `.env` file in the project's root directory, with the correct values for your environment:
 
-* `SESSION_SECRET`: Run `dd if=/dev/random of=- bs=1024 count=1 | sha256sum` and use the results as your secret;
+* `SESSION_SECRET`: Run `dd if=/dev/random bs=1024 count=1 | sha256sum` and use the results as your secret;
 * `JOBSDIR`: Create a directory in which Omoikane can store all it's application files;
 * `RUBYOPT`: Set to `-Ilib`.
 * `OMOIKANE_DATABASE_URL`: The [Sequel](http://sequel.jeremyevans.net/) URL of a database where Omoikane will store it's state.
