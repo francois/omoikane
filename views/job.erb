@@ -28,7 +28,7 @@
         </tr>
       </thead>
       <tbody>
-        <% job.rows.each_with_index do |row, index| %>
+        <% job.rows[0, 1000].each_with_index do |row, index| %>
           <tr style="<%= "display:none" if index > 50 %>">
             <% job.columns.each_with_index do |_, i| %>
               <td><%=convert_value row[i] %></td>
