@@ -19,36 +19,41 @@
     <a href="#" id="graph-this" style="display:none" class="button right tiny secondary"><i class="fi-graph-bar"></i> Graph this!</a>
 
     <h2>Results</h2>
-    <table id="results" class="table">
-      <thead>
-        <tr>
-          <% job.columns.each do |name| %>
-            <th><%=h name %></th>
-          <% end %>
-        </tr>
-      </thead>
-      <tbody>
-        <% job.rows[0, 1000].each_with_index do |row, index| %>
-          <tr style="<%= "display:none" if index > 50 %>">
-            <% job.columns.each_with_index do |_, i| %>
-              <td><%=convert_value row[i] %></td>
+    <% if job.rows_count > 1000 then %>
+      <p>This query returned <%=h job.rows_count %> rows. Only queries with less than 1000 rows can be processed online.</p>
+      <p>Please <a href="/job/<%=h job.query_id %>.csv">download the CSV</a> and process it offline.</p>
+    <% else %>
+      <table id="results" class="table">
+        <thead>
+          <tr>
+            <% job.columns.each do |name| %>
+              <th><%=h name %></th>
             <% end %>
           </tr>
-        <% end %>
-        <% if job.rows_count > 50 then %>
+        </thead>
+        <tbody>
+          <% job.rows[0, 1000].each_with_index do |row, index| %>
+            <tr style="<%= "display:none" if index > 50 %>">
+              <% job.columns.each_with_index do |_, i| %>
+                <td><%=convert_value row[i] %></td>
+              <% end %>
+            </tr>
+          <% end %>
+          <% if job.rows_count > 50 then %>
+            <tr>
+              <td colspan="<%= job.columns_count %>">
+                <p>More rows available, <a href="/job/<%=h job.query_id %>.csv"><i class="fi-page-export-csv"></i> download</a> the results to see them all.</p>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+        <tfoot>
           <tr>
-            <td colspan="<%= job.columns_count %>">
-              <p>More rows available, <a href="/job/<%=h job.query_id %>.csv"><i class="fi-page-export-csv"></i> download</a> the results to see them all.</p>
-            </td>
+            <th scope="row" colspan="<%=h job.columns.size %>">Total Rows: <%=h job.rows_count %></th>
           </tr>
-        <% end %>
-      </tbody>
-      <tfoot>
-        <tr>
-          <th scope="row" colspan="<%=h job.columns.size %>">Total Rows: <%=h job.rows_count %></th>
-        </tr>
-      </tfoot>
-    </table>
+        </tfoot>
+      </table>
+    <% end %>
   <% end %>
 
   <% if job.query_errors.respond_to?(:empty?) && !job.query_errors.empty? then %>

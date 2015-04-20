@@ -9,6 +9,7 @@ class QueryResult < Sequel::Model
 
   def rows
     return [] unless results_path && File.file?(results_path)
+    return [] unless rows_count < 1000
     Zlib::GzipReader.open(results_path) do |io|
       CSV.new(io).read
     end
