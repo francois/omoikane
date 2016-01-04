@@ -1,5 +1,5 @@
 source "https://rubygems.org"
-ruby "2.1.3"
+ruby "2.2.4"
 
 gem "bundler"
 gem "dotenv"
@@ -17,7 +17,7 @@ gem "sequel_pg", require: false # Recommended by Sequel
 group :server do
   gem "escape"
   gem "kramdown"
-  gem "reform"
+  gem "reform", "< 2.0.0"
   gem "sinatra"
   gem "thin"
   gem "tzinfo"

@@ -35,7 +35,8 @@ file{'/usr/local/bin/edb':
   ensure  => file,
   mode    => 0775,
   content => '#!/bin/sh
-exec /usr/local/bin/bundle exec dotenv "${@}"',
+exec /usr/local/bin/bundle exec dotenv "${@}"
+',
 }
 
 file{'/etc/apt/sources.list.d/pgdg.list':
@@ -48,9 +49,10 @@ exec{'/usr/bin/wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.
 
 File['/etc/apt/sources.list.d/pgdg.list'] -> Exec['/usr/bin/wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | /usr/bin/apt-key add -'] -> Exec['/usr/bin/apt-get update']
 
-$ruby_version = '2.1.3'
+$ruby_series  = '2.2'
+$ruby_version = "${ruby_series}.4"
 exec{'download-ruby':
-  command => "/usr/bin/wget --quiet -O /usr/local/src/ruby-${ruby_version}.tar.gz http://cache.ruby-lang.org/pub/ruby/2.1/ruby-${ruby_version}.tar.gz",
+  command => "/usr/bin/wget --quiet -O /usr/local/src/ruby-${ruby_version}.tar.gz http://cache.ruby-lang.org/pub/ruby/${ruby_series}/ruby-${ruby_version}.tar.gz",
   creates => "/usr/local/src/ruby-${ruby_version}.tar.gz",
 }
 
